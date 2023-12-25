@@ -17,26 +17,26 @@ import java.util.stream.Collectors;
  * @description：
  * @modified By：
  */
-public class BugInstanceContainer {
+public class BugInstanceContainer<K extends BugAbility> {
 
-    final static Map<String, List<BugAbility>> BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP = new ConcurrentHashMap<>(1024);
+    final static Map<String, List<? extends BugAbility>> BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP = new ConcurrentHashMap<>(1024);
 
     final static Map<Class<? extends BugAbility>, BugAbility> BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP = new ConcurrentHashMap<>(1024);
 
-    final static Map<Class<? extends BugAbility>, List<BugAbility>> BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP
+    final static Map<Class<? extends BugAbility>, List<? extends BugAbility>> BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP
             = new ConcurrentHashMap<>(1024);
 
-    final static Map<Class<? extends BugAbility>, List<BugAbility>> BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP
+    final static Map<Class<? extends BugAbility>, List<? extends BugAbility>> BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP
             = new ConcurrentHashMap<>(1024);
-    static synchronized void add(BugAbility ability,InstanceSourceEnum sourceEnum){
+    static synchronized <T extends BugAbility> void add(T ability,InstanceSourceEnum sourceEnum){
         String key = ability.getAbilityKey();
         if(InstanceSourceEnum.SPRING.equals(sourceEnum)) {
-            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
+            List<T> bugAbilityList = (List<T>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
             bugAbilityList.removeIf(a -> a.getClass().isAssignableFrom(ability.getClass()));
             bugAbilityList.add(ability);
             BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }else {
-            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
+            List<T> bugAbilityList = (List<T>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
             if(bugAbilityList.stream().anyMatch(a -> a.getClass().isAssignableFrom(ability.getClass()))){
                 return;
             }
@@ -48,12 +48,15 @@ public class BugInstanceContainer {
 
 
 
-    static  Map<String, List<BugAbility>> getBugAbilityOfScopeAndSceneMap(){
+    static  Map<String, List<? extends BugAbility>> getBugAbilityOfScopeAndSceneMap(){
         return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP;
     }
-    static BugAbility getFirst(BugAbility ability){
-        String key = ability.getAbilityKey();
-        return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(key).stream().findFirst().orElse(null);
+    public static BugAbility getFirst(Class<? extends BugAbility> bugAbilityType){
+        return getAbilityByClass(bugAbilityType).stream().findFirst().orElse(null);
+    }
+
+    public static  <T> BugAbility getFirst(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+        return getAbilityByClass(bugAbilityType,abilityReq).stream().findFirst().orElse(null);
     }
 
     /**
@@ -61,9 +64,9 @@ public class BugInstanceContainer {
      * @param bugAbilityType
      * @return
      */
-    private static List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType){
-        List<BugAbility> bugAbilityList = BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
-        if(bugAbilityType != null){
+    private static<K extends BugAbility> List<K>  getSubAbilityByClass(Class<K> bugAbilityType){
+        List<K> bugAbilityList = (List<K>) BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
+        if(bugAbilityList != null){
             if(CollectionUtils.isEmpty(bugAbilityList)){
                 return Collections.emptyList();
             }
@@ -74,7 +77,7 @@ public class BugInstanceContainer {
             if(temp == null){
                 return Collections.emptyList();
             }
-            bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
+            bugAbilityList = (List<K>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
             bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass())).collect(Collectors.toList());
             synchronized (BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP){
                 BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
@@ -88,7 +91,7 @@ public class BugInstanceContainer {
      * @param bugAbilityType
      * @return
      */
-    private  static <T> List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+    public  static <T> List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
         List<? extends BugAbility> bugAbilityList =  getSubAbilityByClass(bugAbilityType);
         if(CollectionUtils.isEmpty(bugAbilityList)){
             return Collections.emptyList();
@@ -100,20 +103,20 @@ public class BugInstanceContainer {
      * @param bugAbilityType
      * @return
      */
-    private static List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType){
-        List<BugAbility> bugAbilityList = BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
-        if(bugAbilityType != null){
+    private static <K extends BugAbility> List<K> getAbilityByClass(Class<K> bugAbilityType){
+        List<K> bugAbilityList = (List<K>) BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
+        if(bugAbilityList != null){
             if(CollectionUtils.isEmpty(bugAbilityList)){
                 return Collections.emptyList();
             }
-            return new LinkedList<>(bugAbilityList);
+            return bugAbilityList;
         }
         synchronized (BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP){
             BugAbility temp = getAbilityTempByClass(bugAbilityType);
             if(temp == null){
                 return Collections.emptyList();
             }
-            bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
+            bugAbilityList = (List<K>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
             bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass())).collect(Collectors.toList());
             synchronized (BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP){
                 BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
@@ -127,8 +130,8 @@ public class BugInstanceContainer {
      * @param bugAbilityType
      * @return
      */
-    private  static <T> List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
-        List<? extends BugAbility> bugAbilityList =  getAbilityByClass(bugAbilityType);
+    public  static <T,K extends BugAbility> List<K> getAbilityByClass(Class<K> bugAbilityType,T abilityReq){
+        List<K> bugAbilityList =  getAbilityByClass(bugAbilityType);
         if(CollectionUtils.isEmpty(bugAbilityList)){
             return Collections.emptyList();
         }
@@ -152,6 +155,6 @@ public class BugInstanceContainer {
                 throw new RuntimeException(e);
             }
         }
-        return null;
+        return temp;
     }
 }
