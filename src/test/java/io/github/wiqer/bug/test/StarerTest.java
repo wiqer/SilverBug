@@ -1,5 +1,8 @@
 package io.github.wiqer.bug.test;
 
+import io.github.wiqer.bug.start.BugStarter;
+import org.junit.Test;
+
 /**
  * ：StarerTest
  *
@@ -12,9 +15,7 @@ package io.github.wiqer.bug.test;
 public class StarerTest {
 
     @Test
-    public void test()
-    {
-        Expression lexer = Expression.parse("home.person.getAge()");
-        assertEquals(person.age, ((Number) lexer.calculate(vars)).intValue());
+    public void test() {
+        BugStarter.run(StarerTest.class);
     }
 }
