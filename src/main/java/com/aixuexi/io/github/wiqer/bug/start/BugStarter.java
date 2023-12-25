@@ -10,4 +10,8 @@ package com.aixuexi.io.github.wiqer.bug.start;
  * @modified By：
  */
 public class BugStarter {
+
+    public void starter() {
+
+    }
 }
