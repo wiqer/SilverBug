@@ -1,6 +1,7 @@
-package io.github.wiqer.bug.test.ability;
+package io.github.wiqer.bug.ability.impl;
 
 import io.github.wiqer.bug.level.TrunkLevel;
+import org.springframework.stereotype.Service;
 
 /**
  * ：TrunkLevelTestAbility
@@ -11,19 +12,20 @@ import io.github.wiqer.bug.level.TrunkLevel;
  * @description：
  * @modified By：
  */
-public class TrunkLevelTestBAbility extends TrunkLevel {
+@Service
+public class TrunkLevelTestA4Ability extends TrunkLevel {
     @Override
     public <T> boolean match(T req) {
-        return true;
+        return false;
     }
 
     @Override
     public int priority() {
-        return super.priority();
+        return -99;
     }
 
     @Override
     public String actionScope() {
-        return "test-b";
+        return "test-a";
     }
 }

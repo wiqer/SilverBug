@@ -22,8 +22,6 @@ import java.util.Map;
 @Component
 public class SpringInstanceManageFactory implements ApplicationContextAware {
 
-    @Autowired
-    private ApplicationContext applicationContext;
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         Map<String, BugAbility> beansOfTypeMap = applicationContext.getBeansOfType(BugAbility.class);

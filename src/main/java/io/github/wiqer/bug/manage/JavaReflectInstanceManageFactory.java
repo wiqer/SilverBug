@@ -4,6 +4,7 @@ import io.github.wiqer.bug.level.BugAbility;
 import io.github.wiqer.bug.utils.ClassUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.Set;
 
 /**
@@ -28,6 +29,14 @@ public class JavaReflectInstanceManageFactory {
         }
         for(Class<?> clz : classSet){
             try {
+                if(clz.isInterface() || Modifier.isAbstract(clz.getModifiers())){
+                    return;
+                }
+                try {
+                    clz.getConstructor();
+                } catch (NoSuchMethodException e) {
+                    throw new RuntimeException(clz.getName()+" cannot be instantiated!", e);
+                }
                 BugAbility per = (BugAbility) clz.newInstance();
                 if(per instanceof BugAbility){
                     BugInstanceContainer.add(per, InstanceSourceEnum.JAVA);

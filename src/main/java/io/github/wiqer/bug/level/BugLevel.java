@@ -9,8 +9,8 @@ package io.github.wiqer.bug.level;
  * @description：
  * @modified By：
  */
-public abstract class BugLevel implements BugAbility{
-    public LevelTypeEnum level(){
+public interface BugLevel extends BugAbility{
+    default LevelTypeEnum level(){
         return LevelTypeEnum.BUG;
     }
 }

@@ -1,4 +1,4 @@
-package io.github.wiqer.bug.test.ability;
+package io.github.wiqer.bug.ability.impl;
 
 import io.github.wiqer.bug.level.TrunkLevel;
 
@@ -11,19 +11,19 @@ import io.github.wiqer.bug.level.TrunkLevel;
  * @description：
  * @modified By：
  */
-public class TrunkLevelTestA4Ability extends TrunkLevel {
+public class TrunkLevelTestBAbility extends TrunkLevel {
     @Override
     public <T> boolean match(T req) {
-        return false;
+        return true;
     }
 
     @Override
     public int priority() {
-        return -99;
+        return super.priority();
     }
 
     @Override
     public String actionScope() {
-        return "test-a";
+        return "test-b";
     }
 }

@@ -1,4 +1,4 @@
-package io.github.wiqer.bug.test;
+package io.github.wiqer.bug;
 
 import io.github.wiqer.bug.start.BugStarter;
 import org.junit.Test;
