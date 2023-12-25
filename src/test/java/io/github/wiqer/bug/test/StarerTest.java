@@ -3,6 +3,8 @@ package io.github.wiqer.bug.test;
 import io.github.wiqer.bug.start.BugStarter;
 import org.junit.Test;
 
+import java.util.Collections;
+
 /**
  * ：StarerTest
  *
@@ -15,7 +17,12 @@ import org.junit.Test;
 public class StarerTest {
 
     @Test
-    public void test() {
+    public void testForClass() {
         BugStarter.run(StarerTest.class);
+    }
+
+    @Test
+    public void testForName() {
+        BugStarter.run(Collections.singleton("io.github.wiqer.bug.test.ability"));
     }
 }
