@@ -18,7 +18,7 @@ public interface BugAbility {
      * @return
      */
     default int priority(){
-        return -1;
+        return Integer.MAX_VALUE;
     }
 
     /**
