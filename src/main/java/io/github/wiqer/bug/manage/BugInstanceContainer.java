@@ -1,9 +1,12 @@
 package io.github.wiqer.bug.manage;
 
 import io.github.wiqer.bug.level.BugAbility;
+import io.github.wiqer.bug.utils.Assert;
+import org.apache.commons.collections4.CollectionUtils;
 
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * ：BugContainer
@@ -16,24 +19,111 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BugInstanceContainer {
 
-    final static Map<String, BugAbility> BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP = new ConcurrentHashMap<>(1024);
+    final static Map<String, List<BugAbility>> BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP = new ConcurrentHashMap<>(1024);
 
+    final static Map<Class<? extends BugAbility>, BugAbility> BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP = new ConcurrentHashMap<>(1024);
+
+    final static Map<Class<? extends BugAbility>, List<BugAbility>> BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP
+            = new ConcurrentHashMap<>(1024);
+
+    final static Map<Class<? extends BugAbility>, List<BugAbility>> BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP
+            = new ConcurrentHashMap<>(1024);
     static synchronized void add(BugAbility ability,InstanceSourceEnum sourceEnum){
         String key = ability.getAbilityKey();
         if(InstanceSourceEnum.SPRING.equals(sourceEnum)) {
-            BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key, ability);
+            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.computeIfAbsent(key, (k) -> new ArrayList<>());
+            bugAbilityList.removeIf(a -> a.getClass().equals(ability.getClass()));
+            bugAbilityList.add(ability);
         }else {
-            BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.putIfAbsent(key, ability);
+            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.computeIfAbsent(key, (k) -> new ArrayList<>());
+            bugAbilityList.add(ability);
         }
+        BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP.put(ability.getClass(),ability);
     }
 
 
 
-    static  Map<String, BugAbility> getBugAbilityOfScopeAndSceneMap(){
+    static  Map<String, List<BugAbility>> getBugAbilityOfScopeAndSceneMap(){
         return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP;
     }
-    static BugAbility get(BugAbility ability){
+    static BugAbility getFirst(BugAbility ability){
         String key = ability.getAbilityKey();
-        return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(key);
+        return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(key).stream().findFirst().orElse(null);
+    }
+
+    /**
+     * 获取继承当前类下的所有能力实现
+     * @param bugAbilityType
+     * @return
+     */
+    public static List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType){
+        List<BugAbility> bugAbilityList = BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
+        if(bugAbilityType != null){
+            if(CollectionUtils.isEmpty(bugAbilityList)){
+                return Collections.emptyList();
+            }
+            return new LinkedList<>(bugAbilityList);
+        }
+        synchronized (BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP){
+            BugAbility temp = getAbilityTempByClass(bugAbilityType);
+            if(temp == null){
+                return Collections.emptyList();
+            }
+            bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
+            bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass())).collect(Collectors.toList());
+            synchronized (BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP){
+                BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
+            }
+        }
+
+        return new LinkedList<>(bugAbilityList);
+    }
+
+    /**
+     * 获取当前类和继承当前类下的所有能力实现，使用唯一能力kay匹配
+     * @param bugAbilityType
+     * @return
+     */
+    public static List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType){
+        List<BugAbility> bugAbilityList = BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
+        if(bugAbilityType != null){
+            if(CollectionUtils.isEmpty(bugAbilityList)){
+                return Collections.emptyList();
+            }
+            return new LinkedList<>(bugAbilityList);
+        }
+        synchronized (BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP){
+            BugAbility temp = getAbilityTempByClass(bugAbilityType);
+            if(temp == null){
+                return Collections.emptyList();
+            }
+            bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
+            bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass())).collect(Collectors.toList());
+            synchronized (BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP){
+                BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
+            }
+        }
+
+        return new LinkedList<>(bugAbilityList);
+    }
+
+    private static BugAbility getAbilityTempByClass(Class<? extends BugAbility> bugAbilityType) {
+        BugAbility temp = BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP.get(bugAbilityType);
+        if(temp == null){
+            try {
+                if (bugAbilityType.isInterface()) {
+                    throw new IllegalArgumentException("BugAbility clazz , bugAbilityType must be not interface");
+                }
+                temp = bugAbilityType.newInstance();
+                Assert.notNull(temp, "can't newInstance by" + bugAbilityType);
+                BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP.put(bugAbilityType,temp);
+                return temp;
+            } catch (InstantiationException e) {
+                throw new RuntimeException(e);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return null;
     }
 }
