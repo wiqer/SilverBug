@@ -4,12 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.aixuexi.speech</groupId>
-    <artifactId>speech-course-manager-api</artifactId>
-    <version>1.0.6-SNAPSHOT</version>
+    <groupId>io.github.wiqer</groupId>
+    <artifactId>SilverBug</artifactId>
+    <version>1.0.1-SNAPSHOT</version>
 
 
     <properties>
+        <commons-lang3.version>3.12.0</commons-lang3.version>
         <spring.version>6.1.0</spring.version>
         <cat.version>3.0.0</cat.version>
         <aiproduceapi.version>itv_topic_summary-7.4.2-SNAPSHOT</aiproduceapi.version>
@@ -77,16 +78,6 @@
             </plugin>
         </plugins>
     </build>
-    <distributionManagement>
-        <repository>
-            <id>nexus</id>
-            <url>http://maven.aixuexi.com:8081/nexus/content/repositories/releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>nexus</id>
-            <url>http://maven.aixuexi.com:8081/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
     <repositories>
         <repository>
             <id>nexus</id>
