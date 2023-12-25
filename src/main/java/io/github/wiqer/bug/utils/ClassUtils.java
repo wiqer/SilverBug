@@ -1,4 +1,4 @@
-package com.aixuexi.io.github.wiqer.bug.utils;
+package io.github.wiqer.bug.utils;
 
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,14 +28,7 @@ public final class ClassUtils {
     /**
      * 定义类集合（存放基础包名下的所有类）
      */
-    private static final Set<Class<?>> CLASS_SET;
-    private static final String basePackage = "com.wiqer.mole";
-    static {
-        //获取基础包名
-
-        //获取基础包名下所有类
-        CLASS_SET = getClassSet(basePackage);
-    }
+    private static Set<Class<?>> CLASS_SET;
     /**
      * 获取类加载器
      */
@@ -104,12 +97,6 @@ public final class ClassUtils {
             throw new RuntimeException(e);
         }
         return classSet;
-    }
-    public static void mergeClassSet(String packageName){
-        if(StringUtils.isNotEmpty( packageName)&&!packageName.equals(basePackage)){
-            CLASS_SET.addAll(getClassSet(packageName));
-        }
-
     }
     private static void addClass(Set<Class<?>> classSet, String packagePath, String packageName) {
         File[] files = new File(packagePath).listFiles(new FileFilter() {

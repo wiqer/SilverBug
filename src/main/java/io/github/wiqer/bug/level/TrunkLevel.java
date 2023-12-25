@@ -1,4 +1,4 @@
-package com.aixuexi.io.github.wiqer.bug.level;
+package io.github.wiqer.bug.level;
 
 /**
  * ：DDDTrunk

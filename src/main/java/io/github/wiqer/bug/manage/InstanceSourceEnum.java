@@ -1,4 +1,4 @@
-package com.aixuexi.io.github.wiqer.bug.manage;
+package io.github.wiqer.bug.manage;
 
 import lombok.Getter;
 

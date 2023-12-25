@@ -1,6 +1,6 @@
-package com.aixuexi.io.github.wiqer.bug.manage;
+package io.github.wiqer.bug.manage;
 
-import com.aixuexi.io.github.wiqer.bug.level.BugAbility;
+import io.github.wiqer.bug.level.BugAbility;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

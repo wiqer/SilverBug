@@ -1,4 +1,4 @@
-package com.aixuexi.io.github.wiqer.bug.manage;
+package io.github.wiqer.bug.manage;
 
 /**
  * ：JavaReflectInstanceManageFactory
@@ -11,7 +11,7 @@ package com.aixuexi.io.github.wiqer.bug.manage;
  */
 public class JavaReflectInstanceManageFactory {
 
-    void scanAllClassesOnPackageNames(String packageName){
+    static void scanAllClassesOnPackageNames(String packageName){
 
     }
 }

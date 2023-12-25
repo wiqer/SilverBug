@@ -1,4 +1,4 @@
-package com.aixuexi.io.github.wiqer.bug.level;
+package io.github.wiqer.bug.level;
 
 /**
  * 负责充血模型能力扩展

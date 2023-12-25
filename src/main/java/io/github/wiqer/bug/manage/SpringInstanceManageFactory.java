@@ -1,14 +1,13 @@
-package com.aixuexi.io.github.wiqer.bug.manage;
+package io.github.wiqer.bug.manage;
 
-import com.aixuexi.io.github.wiqer.bug.level.BugAbility;
+import io.github.wiqer.bug.level.BugAbility;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import java.util.HashSet;
+
 import java.util.Map;
-import java.util.Set;
 
 /**
  * ：TestEntity
