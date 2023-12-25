@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 /**
@@ -28,7 +29,7 @@ public final class ClassUtils {
     /**
      * 定义类集合（存放基础包名下的所有类）
      */
-    private static Set<Class<?>> CLASS_SET;
+    private final static Set<Class<?>> CLASS_SET = new ConcurrentSkipListSet<>();
     /**
      * 获取类加载器
      */
@@ -71,7 +72,6 @@ public final class ClassUtils {
                 if (url != null) {
                     String protocol = new String(url.getProtocol().getBytes(StandardCharsets.UTF_8)) ;
                     if (protocol.equals("file")) {
-//                        String package1= new String( url.getPath().getBytes(StandardCharsets.UTF_8)) ;
                         String packagePath =   URLDecoder.decode(url.getPath(), String.valueOf(StandardCharsets.UTF_8));//new String( url.getPath().replaceAll("%20", " ").getBytes("gbk") , StandardCharsets.UTF_8);
                         addClass(classSet, packagePath, packageName);
                     } else if (protocol.equals("jar")) {
@@ -96,6 +96,7 @@ public final class ClassUtils {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        CLASS_SET.addAll(classSet);
         return classSet;
     }
     private static void addClass(Set<Class<?>> classSet, String packagePath, String packageName) {
@@ -153,6 +154,16 @@ public final class ClassUtils {
         return classSet;
     }
 
+    public static Set<Class<?>> getClassSetBySuper(Class<?> superClass, Set<Class<?>> classSet) {
+        Set<Class<?>> resultClassSet = new HashSet<Class<?>>();
+        for (Class<?> cls : classSet) {
+            //isAssignableFrom() 指 superClass 和 cls 是否相同或 superClass 是否是 cls 的父类/接口
+            if (superClass.isAssignableFrom(cls) && !superClass.equals(cls)) {
+                resultClassSet.add(cls);
+            }
+        }
+        return resultClassSet;
+    }
     /**
      * 获取基础包名下带有某注解的所有类
      */
