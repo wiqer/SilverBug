@@ -31,12 +31,14 @@ public class BugInstanceContainer {
     static synchronized void add(BugAbility ability,InstanceSourceEnum sourceEnum){
         String key = ability.getAbilityKey();
         if(InstanceSourceEnum.SPRING.equals(sourceEnum)) {
-            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.putIfAbsent(key, new ArrayList<>());
-            bugAbilityList.removeIf(a -> a.getClass().equals(ability.getClass()));
+            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
+            bugAbilityList.removeIf(a -> a.getClass().isAssignableFrom(ability.getClass()));
             bugAbilityList.add(ability);
+            BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }else {
-            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.putIfAbsent(key, new ArrayList<>());
+            List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
             bugAbilityList.add(ability);
+            BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }
         BUG_ABILITY_TEMP_OF_CLASS_TYPE_MAP.put(ability.getClass(),ability);
     }
