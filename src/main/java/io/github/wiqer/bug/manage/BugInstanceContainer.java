@@ -37,6 +37,9 @@ public class BugInstanceContainer {
             BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }else {
             List<BugAbility> bugAbilityList = BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
+            if(bugAbilityList.stream().anyMatch(a -> a.getClass().isAssignableFrom(ability.getClass()))){
+                return;
+            }
             bugAbilityList.add(ability);
             BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }
