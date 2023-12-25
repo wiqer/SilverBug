@@ -9,7 +9,7 @@ public interface BugAbility {
      * 能力匹配接口
      * @return
      */
-    boolean match();
+    <T> boolean match(T req);
 
     LevelTypeEnum level();
 

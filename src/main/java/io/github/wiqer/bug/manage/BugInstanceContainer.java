@@ -56,13 +56,13 @@ public class BugInstanceContainer {
      * @param bugAbilityType
      * @return
      */
-    public static List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType){
+    private static List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType){
         List<BugAbility> bugAbilityList = BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
         if(bugAbilityType != null){
             if(CollectionUtils.isEmpty(bugAbilityList)){
                 return Collections.emptyList();
             }
-            return new LinkedList<>(bugAbilityList);
+            return bugAbilityList;
         }
         synchronized (BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP){
             BugAbility temp = getAbilityTempByClass(bugAbilityType);
@@ -75,16 +75,27 @@ public class BugInstanceContainer {
                 BUG_SUB_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
             }
         }
-
-        return new LinkedList<>(bugAbilityList);
+        bugAbilityList = bugAbilityList.stream().sorted(Comparator.comparing(BugAbility::priority)).collect(Collectors.toList());
+        return bugAbilityList;
     }
-
+    /**
+     * 获取继承当前类下的所有能力实现
+     * @param bugAbilityType
+     * @return
+     */
+    private  static <T> List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+        List<? extends BugAbility> bugAbilityList =  getSubAbilityByClass(bugAbilityType);
+        if(CollectionUtils.isEmpty(bugAbilityList)){
+            return Collections.emptyList();
+        }
+        return bugAbilityList.stream().filter(a -> a.match(abilityReq)).collect(Collectors.toList());
+    }
     /**
      * 获取当前类和继承当前类下的所有能力实现，使用唯一能力kay匹配
      * @param bugAbilityType
      * @return
      */
-    public static List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType){
+    private static List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType){
         List<BugAbility> bugAbilityList = BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.get(bugAbilityType);
         if(bugAbilityType != null){
             if(CollectionUtils.isEmpty(bugAbilityList)){
@@ -103,8 +114,20 @@ public class BugInstanceContainer {
                 BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
             }
         }
-
+        bugAbilityList = bugAbilityList.stream().sorted(Comparator.comparing(BugAbility::priority)).collect(Collectors.toList());
         return new LinkedList<>(bugAbilityList);
+    }
+    /**
+     * 获取当前类和继承当前类下的所有能力实现，使用唯一能力kay匹配
+     * @param bugAbilityType
+     * @return
+     */
+    private  static <T> List<? extends BugAbility> getAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+        List<? extends BugAbility> bugAbilityList =  getAbilityByClass(bugAbilityType);
+        if(CollectionUtils.isEmpty(bugAbilityList)){
+            return Collections.emptyList();
+        }
+        return bugAbilityList.stream().filter(a -> a.match(abilityReq)).collect(Collectors.toList());
     }
 
     private static BugAbility getAbilityTempByClass(Class<? extends BugAbility> bugAbilityType) {
