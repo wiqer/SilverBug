@@ -4,6 +4,7 @@ import io.github.wiqer.bug.level.BugAbility;
 import io.github.wiqer.bug.utils.Assert;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -52,10 +53,16 @@ public class BugInstanceContainer<K extends BugAbility> {
         return BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP;
     }
     public static BugAbility getFirst(Class<? extends BugAbility> bugAbilityType){
+        if (bugAbilityType.isInterface() || Modifier.isAbstract(bugAbilityType.getModifiers())) {
+            throw new IllegalArgumentException("传入的类型不能是接口或抽象类");
+        }
         return getAbilityByClass(bugAbilityType).stream().findFirst().orElse(null);
     }
 
     public static  <T> BugAbility getFirst(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+        if (bugAbilityType.isInterface() || Modifier.isAbstract(bugAbilityType.getModifiers())) {
+            throw new IllegalArgumentException("传入的类型不能是接口或抽象类");
+        }
         return getAbilityByClass(bugAbilityType,abilityReq).stream().findFirst().orElse(null);
     }
 
@@ -92,6 +99,9 @@ public class BugInstanceContainer<K extends BugAbility> {
      * @return
      */
     public  static <T> List<? extends BugAbility> getSubAbilityByClass(Class<? extends BugAbility> bugAbilityType,T abilityReq){
+        if (bugAbilityType.isInterface() || Modifier.isAbstract(bugAbilityType.getModifiers())) {
+            throw new IllegalArgumentException("传入的类型不能是接口或抽象类");
+        }
         List<? extends BugAbility> bugAbilityList =  getSubAbilityByClass(bugAbilityType);
         if(CollectionUtils.isEmpty(bugAbilityList)){
             return Collections.emptyList();
@@ -123,7 +133,7 @@ public class BugInstanceContainer<K extends BugAbility> {
             }
         }
         bugAbilityList = bugAbilityList.stream().sorted(Comparator.comparing(BugAbility::priority)).collect(Collectors.toList());
-        return new LinkedList<>(bugAbilityList);
+        return bugAbilityList;
     }
     /**
      * 获取当前类和继承当前类下的所有能力实现，使用唯一能力kay匹配
@@ -131,6 +141,9 @@ public class BugInstanceContainer<K extends BugAbility> {
      * @return
      */
     public  static <T,K extends BugAbility> List<K> getAbilityByClass(Class<K> bugAbilityType,T abilityReq){
+        if (bugAbilityType.isInterface() || Modifier.isAbstract(bugAbilityType.getModifiers())) {
+            throw new IllegalArgumentException("传入的类型不能是接口或抽象类");
+        }
         List<K> bugAbilityList =  getAbilityByClass(bugAbilityType);
         if(CollectionUtils.isEmpty(bugAbilityList)){
             return Collections.emptyList();
