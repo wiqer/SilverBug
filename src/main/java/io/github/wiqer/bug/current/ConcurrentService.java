@@ -1,8 +1,9 @@
 package io.github.wiqer.bug.current;
 
-import com.google.common.collect.Lists;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import java.util.*;
@@ -28,7 +29,7 @@ public class ConcurrentService {
 
     private final String name;
 
-    public ConcurrentService(ExecutorService executorService,String name) {
+    public ConcurrentService(ExecutorService executorService, String name) {
         this.executorService = executorService;
         this.name = name;
     }
@@ -66,7 +67,7 @@ public class ConcurrentService {
             return Collections.emptyList();
         }
         List<Future<List<R>>> futures = new ArrayList<>();
-        for (List<T> param : Lists.partition(list, batchSize)) {
+        for (List<T> param : ListUtils.partition(list, batchSize)) {
             Future<List<R>> future = executorService.submit(() -> readFunction.apply(param));
             futures.add(future);
         }
@@ -93,7 +94,7 @@ public class ConcurrentService {
             return Collections.emptyList();
         }
         List<Future<List<R>>> futures = new ArrayList<>(list.size()/batchSize);
-        for (List<T> param : Lists.partition(list, batchSize)) {
+        for (List<T> param : ListUtils.partition(list, batchSize)) {
             Future<List<R>> future = executorService.submit(() -> readBiFunction.apply(param, conditionParam));
             futures.add(future);
         }
@@ -121,7 +122,7 @@ public class ConcurrentService {
         }
         list = list.stream().distinct().collect(Collectors.toList());
         List<Future<Map<String,R>>> futures = new ArrayList<>(list.size()/batchSize + 1);
-        for (List<T> param : Lists.partition(list, batchSize)) {
+        for (List<T> param : ListUtils.partition(list, batchSize)) {
             Future<Map<String,R>> future = executorService.submit(() -> readBiFunction.apply(param, conditionParam));
             futures.add(future);
         }
