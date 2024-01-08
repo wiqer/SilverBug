@@ -12,10 +12,9 @@ import javax.annotation.Resource;
  * ：TrunkLevelTestAbility
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  15:17
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  15:17
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 @Service
 public class TrunkLevelTestA1Ability extends TrunkLevel implements CacheManger {

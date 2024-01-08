@@ -8,10 +8,9 @@ import java.util.concurrent.ThreadLocalRandom;
  * ：IdGeneratorService
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  11:07
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  11:07
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 @Service
 public class IdGeneratorService {
@@ -21,7 +20,7 @@ public class IdGeneratorService {
     private static final int rankMoveBit = 12;
 
     /**
-     *  * @date ：Created in 13 / 2023/11/13
+     *  * date ：Created in 13 / 2023/11/13
      *  千万别动，动了就把业务干废了
      */
     private static final long time = 1699869436004L;

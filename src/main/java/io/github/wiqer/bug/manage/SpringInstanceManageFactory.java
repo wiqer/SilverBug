@@ -13,10 +13,9 @@ import java.util.Map;
  * ：TestEntity
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  12:36
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  12:36
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 
 @Component

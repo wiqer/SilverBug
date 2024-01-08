@@ -12,10 +12,9 @@ import org.springframework.test.context.junit4.SpringRunner;
  * ：SpringBootStarerTest
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  16:43
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  16:43
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootStarerTest.class, StartUpApplication.class})

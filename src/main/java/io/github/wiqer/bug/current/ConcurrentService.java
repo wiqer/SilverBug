@@ -21,10 +21,9 @@ import io.github.wiqer.bug.utils.Assert;
  * ：ConcurrentService
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  11:07
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  11:07
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 @Slf4j
 public class ConcurrentService {

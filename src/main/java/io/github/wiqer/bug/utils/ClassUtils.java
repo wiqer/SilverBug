@@ -20,10 +20,9 @@ import java.util.jar.JarFile;
  * ：ClassUtils
  *
  * @author ：李岚峰、lilanfeng、
- * @device name ：user
- * @date ：Created in 25 / 2023/12/25  13:34
- * @description：默认
- * @modified By：llf.lilanfeng
+ * date ：Created in 25 / 2023/12/25  13:34
+ * description：默认
+ * modified By：llf.lilanfeng
  */
 public final class ClassUtils {
 
