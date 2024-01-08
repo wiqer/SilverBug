@@ -9,8 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author ：李岚峰、lilanfeng、
  * @device name ：user
  * @date ：Created in 25 / 2023/12/25  17:46
- * @description：
- * @modified By：
+ * @description：默认
+ * @modified By：llf.lilanfeng
  */
 @SpringBootApplication(scanBasePackages = "io.github.wiqer.bug")
 public class StartUpApplication {

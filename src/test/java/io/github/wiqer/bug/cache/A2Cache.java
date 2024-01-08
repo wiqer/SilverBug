@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
  * @author ：李岚峰、lilanfeng、
  * @device name ：user
  * @date ：Created in 25 / 2023/12/25  16:47
- * @description：
- * @modified By：
+ * @description：默认
+ * @modified By：llf.lilanfeng
  */
 @Service("a2Cache")
 public class A2Cache implements TestCache {
