@@ -7,12 +7,15 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import io.github.wiqer.bug.utils.Assert;
 
 /**
  * ：ConcurrentService
@@ -142,5 +145,46 @@ public class ConcurrentService {
             return Collections.emptyMap();
         }
         return resultList;
+    }
+
+    public  Map<Callable, Object> fetchCallableReturnResultMap(Callable... callables) {
+        Assert.notNull(callables , "can't newInstance by callables");
+        int capacity = computeArrayListCapacity(callables.length);
+        ArrayList<Callable> list = new ArrayList(capacity);
+        Collections.addAll(list, callables);
+        if(CollectionUtils.isEmpty(list)){
+            return Collections.emptyMap();
+        }
+        List<Future<Object>> futures = new ArrayList<>(callables.length);
+        Map<Future<Object>, Callable> futureMap = new HashMap<>();
+        for (Callable callable : list) {
+            Future future = executorService.submit(callable);
+            futures.add(future);
+            futureMap.put(future, callable);
+        }
+        Map<Callable, Object> resultMap = new HashMap<>();
+
+        for (Map.Entry<Future<Object>, Callable> entry: futureMap.entrySet()) {
+            Future<Object> future = entry.getKey();
+            try {
+                Object result = future.get();
+                if(result != null) {
+                    resultMap.put(entry.getValue(), result);
+                }
+            } catch (InterruptedException | ExecutionException e) {
+                log.error(name, e);
+            }
+        }
+        if(MapUtils.isEmpty(resultMap)){
+            return Collections.emptyMap();
+        }
+        return resultMap;
+    }
+     public <T> T getResultFromMap(Map<Callable, Object> resultMap, Callable<T> callable){
+        return (T) resultMap.get(callable);
+    }
+    static int computeArrayListCapacity(int arraySize) {
+        Assert.checkNonnegative(arraySize, "arraySize");
+        return arraySize;
     }
 }

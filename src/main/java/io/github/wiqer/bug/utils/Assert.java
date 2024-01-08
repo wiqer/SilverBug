@@ -46,6 +46,12 @@ public class Assert {
     private static String nullSafeGet(Supplier<String> messageSupplier) {
         return messageSupplier != null ? (String)messageSupplier.get() : null;
     }
-
+    public  static int checkNonnegative(int value, String name) {
+        if (value < 0) {
+            throw new IllegalArgumentException(name + " cannot be negative but was: " + value);
+        } else {
+            return value;
+        }
+    }
 
 }
