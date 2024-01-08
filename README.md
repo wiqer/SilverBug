@@ -38,3 +38,9 @@ io.github.wiqer.bug.current.ConcurrentService
 ### 4，单线程读数据
 
 io.github.wiqer.bug.current.lock.LockService
+
+## 对DDD的理解
+ddd是模型高度抽象、业务模型承载简单的参数处理能力、代码分层（同层代码不互相调用）、业务能力抽象统一管理等等没理解到的概念，至于咋实现，实现到什么程度，该不该ddd是另一码事
+
+## 对OOP的理解
+
