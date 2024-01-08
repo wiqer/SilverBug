@@ -20,7 +20,7 @@ import java.util.concurrent.Executors;
 public class ConcurrentServiceTest {
 
     @Test
-    public void testForClass() {
+    public void testForConcurrentServiceTest() {
         ConcurrentService concurrentService
                 = new ConcurrentService(Executors.newFixedThreadPool(18),"ConcurrentServiceTest");
         Callable <String> callable1 = () -> {
