@@ -11,6 +11,9 @@ pom 坐标
 </dependency>
 ```
 
+启动类加
+@BugEnableCustomServices注解
+
 ## SilverBug是什么
 开发小工具，其中承载了多种解决常见棘手业务问题的工具
 
