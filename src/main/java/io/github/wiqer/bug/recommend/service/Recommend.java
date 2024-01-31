@@ -4,8 +4,8 @@ package io.github.wiqer.bug.recommend.service;
 import io.github.wiqer.bug.recommend.core.ItemContentBasedFiltering;
 import io.github.wiqer.bug.recommend.core.ItemContentFiltering;
 import io.github.wiqer.bug.recommend.core.UserContentFiltering;
-import io.github.wiqer.bug.recommend.dto.ItemDTO;
-import io.github.wiqer.bug.recommend.dto.RelateDTO;
+import io.github.wiqer.bug.recommend.dto.ItemModel;
+import io.github.wiqer.bug.recommend.dto.RelateModel;
 import io.github.wiqer.bug.recommend.gateway.FileDataSource;
 
 import java.util.List;
@@ -26,12 +26,12 @@ public class Recommend {
      * 方法描述: 猜你喜欢
      *
      * @param userId 用户id
-     * @Return {@link List<ItemDTO>}
+     * @Return {@link List< ItemModel >}
      * @author tarzan
      * @date 2020年07月31日 17:28:06
      */
-    public static List<ItemDTO>  userCfRecommend(int userId, FileDataSource fileDataSource){
-        List<RelateDTO> data= fileDataSource.getData();
+    public static List<ItemModel>  userCfRecommend(int userId, FileDataSource fileDataSource){
+        List<RelateModel> data= fileDataSource.getData();
         List<Integer> recommendations = UserContentFiltering.recommend(userId, data);
         return fileDataSource.getItemData().stream().filter(e->recommendations.contains(e.getId())).collect(Collectors.toList());
     }
@@ -41,12 +41,12 @@ public class Recommend {
      * 方法描述: 猜你喜欢
      *
      * @param itemId 物品id
-     * @Return {@link List<ItemDTO>}
+     * @Return {@link List< ItemModel >}
      * @author tarzan
      * @date 2020年07月31日 17:28:06
      */
-    public static List<ItemDTO>  itemCfRecommend(int itemId, FileDataSource fileDataSource){
-        List<RelateDTO> data= fileDataSource.getData();
+    public static List<ItemModel>  itemCfRecommend(int itemId, FileDataSource fileDataSource){
+        List<RelateModel> data= fileDataSource.getData();
         List<Integer> recommendations = ItemContentFiltering.recommend(itemId, data);
         return fileDataSource.getItemData().stream().filter(e->recommendations.contains(e.getId())).collect(Collectors.toList());
     }

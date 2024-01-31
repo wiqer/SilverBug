@@ -1,7 +1,7 @@
 package io.github.wiqer.bug.recommend.core;
 
 
-import io.github.wiqer.bug.recommend.dto.RelateDTO;
+import io.github.wiqer.bug.recommend.dto.RelateModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,9 +27,9 @@ public class CoreMath {
      * @param map
      * @return Map<Integer,Double>
      */
-    public static Map<Integer,Double> computeNeighbor(Integer key, Map<Integer,List<RelateDTO>>  map,int type) {
+    public static Map<Integer,Double> computeNeighbor(Integer key, Map<Integer,List<RelateModel>>  map, int type) {
         Map<Integer,Double> distMap = new TreeMap<>();
-        List<RelateDTO> userItems=map.get(key);
+        List<RelateModel> userItems=map.get(key);
         map.forEach((k,v)->{
             //排除此用户
             if(!k.equals(key)){
@@ -52,7 +52,7 @@ public class CoreMath {
      * @param type 类型0基于用户推荐 1基于物品推荐
      * @return double
      */
-    private static double relateDist(List<RelateDTO> xList, List<RelateDTO> yList,int type) {
+    private static double relateDist(List<RelateModel> xList, List<RelateModel> yList, int type) {
         List<Double> xs= new ArrayList<>(xList.size());
         List<Double> ys=  new ArrayList<>(yList.size());
         xList.forEach(x->{

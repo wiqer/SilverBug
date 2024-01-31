@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDTO {
+public class ItemModel {
     /** 主键 */
     private Integer id;
     /** 名称 */

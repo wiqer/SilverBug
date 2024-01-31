@@ -1,8 +1,8 @@
 package io.github.wiqer.bug.recommend.gateway;
 
-import io.github.wiqer.bug.recommend.dto.ItemDTO;
-import io.github.wiqer.bug.recommend.dto.UserDTO;
-import io.github.wiqer.bug.recommend.dto.RelateDTO;
+import io.github.wiqer.bug.recommend.dto.ItemModel;
+import io.github.wiqer.bug.recommend.dto.UserModel;
+import io.github.wiqer.bug.recommend.dto.RelateModel;
 
 import java.util.List;
 
@@ -15,29 +15,29 @@ public interface FileDataSource {
     /**
      * 方法描述: 读取基础数据
      *
-     * @Return {@link List<RelateDTO>}
+     * @Return {@link List< RelateModel >}
      * @author tarzan
      * @date 2020年07月31日 16:53:40
      */
-    List<RelateDTO> getData() ;
+    List<RelateModel> getData() ;
     /**
      * 方法描述: 读取用户数据
      *
-     * @Return {@link List<UserDTO>}
+     * @Return {@link List< UserModel >}
      * @author tarzan
      * @date 2020年07月31日 16:54:51
      */
-    List<UserDTO> getUserData() ;
+    List<UserModel> getUserData() ;
 
 
     /**
      * 方法描述: 读取电影数据
      *
-     * @Return {@link List<ItemDTO>}
+     * @Return {@link List< ItemModel >}
      * @author tarzan
      * @date 2020年07月31日 16:54:22
      */
-    List<ItemDTO> getItemData() ;
+    List<ItemModel> getItemData() ;
 
 
 }

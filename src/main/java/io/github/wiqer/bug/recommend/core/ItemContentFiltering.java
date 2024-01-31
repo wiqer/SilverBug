@@ -1,7 +1,7 @@
 package io.github.wiqer.bug.recommend.core;
 
 
-import io.github.wiqer.bug.recommend.dto.RelateDTO;
+import io.github.wiqer.bug.recommend.dto.RelateModel;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,9 +26,9 @@ public class ItemContentFiltering {
      * @return {@link List<Integer>}
      * @date 2023年02月02日 14:51:42
      */
-    public static List<Integer> recommend(Integer itemId, List<RelateDTO> list) {
+    public static List<Integer> recommend(Integer itemId, List<RelateModel> list) {
         //按物品分组
-        Map<Integer, List<RelateDTO>>  itemMap=list.stream().collect(Collectors.groupingBy(RelateDTO::getItemId));
+        Map<Integer, List<RelateModel>>  itemMap=list.stream().collect(Collectors.groupingBy(RelateModel::getItemId));
         //获取其他物品与当前物品的关系值
         Map<Integer,Double>  itemDisMap = CoreMath.computeNeighbor(itemId, itemMap,1);
         //获取关系最近物品

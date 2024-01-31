@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RelateDTO {
+public class RelateModel {
     /** 用户id */
     private Integer useId;
     /** 物品id */
