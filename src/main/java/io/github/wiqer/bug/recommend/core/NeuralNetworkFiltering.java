@@ -50,7 +50,9 @@ public class NeuralNetworkFiltering {
         this.weightsInputHidden = new double[inputSize][hiddenSize];
         this.weightsHiddenOutput = new double[hiddenSize][outputSize];
         this.random = new Random();
-
+        if(outputSize > hiddenSize){
+            throw new RuntimeException("outputSize > hiddenSize");
+        }
         initializeWeights();
     }
 
@@ -145,10 +147,16 @@ public class NeuralNetworkFiltering {
 
     public double[] getErrorsPro(double[] nextLayerErrors, double[] actual) {
         double[] errors = new double[hiddenSize];
-        assert weightsHiddenOutput[0] != null;
-       int hiddenOutputSize = weightsHiddenOutput[0].length;
+       int hiddenOutputSize = outputSize;
         if(nextLayerErrors.length > hiddenOutputSize){
-            nextLayerErrors[hiddenOutputSize-1] =  calculateLoss(Arrays.copyOfRange(nextLayerErrors, hiddenOutputSize, nextLayerErrors.length), actual);
+            double[] nextLayerLastErrors = Arrays.copyOfRange(nextLayerErrors, hiddenOutputSize, nextLayerErrors.length);
+            if (nextLayerLastErrors.length > actual.length) {
+                nextLayerLastErrors = Arrays.copyOf(nextLayerLastErrors, actual.length);
+            }
+            if (nextLayerLastErrors.length < actual.length) {
+                actual = Arrays.copyOf(actual, nextLayerLastErrors.length);
+            }
+            nextLayerErrors[hiddenOutputSize-1] =  calculateLoss(nextLayerLastErrors, actual);
         }
         for (int i = 0; i < hiddenSize; i++) {
             double error = 0;
