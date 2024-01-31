@@ -23,7 +23,7 @@ public class ThreeLayerNeuralNetwork {
         if(outputSize1 > hiddenSize2){
             throw new RuntimeException("outputSize1 > hiddenSize2");
         }
-        if(outputSize1 > hiddenSize2){
+        if(outputSize1 > outputHiddenSize){
             throw new RuntimeException("outputSize2 > outputHiddenSize");
         }
         this.hiddenLayer1 = new NeuralNetworkFiltering(inputSize, hiddenSize1, outputSize1, learningRate);
