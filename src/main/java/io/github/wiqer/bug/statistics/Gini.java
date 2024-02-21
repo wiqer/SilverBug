@@ -19,11 +19,11 @@ public class Gini {
 
     public static void main(String[] args) {
         // 基尼系数
-        double G = 0.86;
+        double G = 0.78888;
         // 总的年收入（亿元）
         double totalIncome = 1210207;
         // 总人口数量
-        double totalPopulation = 14e8;
+        double totalPopulation = 14.11e8;
         acquiringClassDisparities(totalPopulation, totalIncome, G);
 
     }
