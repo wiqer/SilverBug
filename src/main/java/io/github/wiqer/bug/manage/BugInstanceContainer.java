@@ -32,7 +32,6 @@ public class BugInstanceContainer<K extends BugAbility> {
         String key = ability.getAbilityKey();
         if(InstanceSourceEnum.SPRING.equals(sourceEnum)) {
             List<T> bugAbilityList = (List<T>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.getOrDefault(key, new ArrayList<>());
-            bugAbilityList.removeIf(a -> a.getClass().isAssignableFrom(ability.getClass()));
             bugAbilityList.add(ability);
             BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.put(key,bugAbilityList);
         }else {
@@ -126,7 +125,7 @@ public class BugInstanceContainer<K extends BugAbility> {
                 return Collections.emptyList();
             }
             bugAbilityList = (List<K>) BUG_ABILITY_OF_SCOPE_AND_SCENE_MAP.get(temp.getAbilityKey());
-            bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass())).collect(Collectors.toList());
+            bugAbilityList = bugAbilityList.stream().filter(a -> temp.getClass().isAssignableFrom(a.getClass()) || temp.getClass().equals(a.getClass())).collect(Collectors.toList());
             synchronized (BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP){
                 BUG_ABILITY_LIST_OF_CLASS_TYPE_MAP.put(bugAbilityType, bugAbilityList);
             }
