@@ -24,14 +24,19 @@ public class NamedThreadFactory implements ThreadFactory {
         namePrefix = name + "-" + poolNumber.getAndIncrement() + "-thread-";
     }
 
+    @Override
     public Thread newThread(Runnable r) {
         Thread t = new Thread(group, r,
                 namePrefix + threadNumber.getAndIncrement(),
                 0);
-        if (t.isDaemon())
+        if (t.isDaemon()) {
             t.setDaemon(false);
-        if (t.getPriority() != Thread.NORM_PRIORITY)
+        }
+        if (t.getPriority() != Thread.NORM_PRIORITY) {
             t.setPriority(Thread.NORM_PRIORITY);
+        }
         return t;
     }
+
+
 }
