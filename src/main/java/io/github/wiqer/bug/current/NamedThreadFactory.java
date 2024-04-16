@@ -37,6 +37,4 @@ public class NamedThreadFactory implements ThreadFactory {
         }
         return t;
     }
-
-
 }
