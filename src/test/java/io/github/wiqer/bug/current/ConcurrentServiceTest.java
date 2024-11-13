@@ -35,13 +35,20 @@ public class ConcurrentServiceTest {
             // 这里是你的任务3
             return 3;
         };
-        Map<Callable, Object> resultMap = concurrentService.fetchCallableReturnResultMap(callable1,  callable2, callable3);
+        Callable<Void> callableNull = () -> {
+            // 这里是你的任务3
+            System.out.println("Result of Task3 is null");
+            return Void.TYPE.newInstance();
+        };
+        Map<Callable<?>, Object> resultMap = concurrentService.fetchCallableReturnResultMap(callable1,  callable2, callable3);
         String result1 = concurrentService.getResultFromMap(resultMap, callable1);
         System.out.println("callable1 result is -->" + result1);
         String result2 = concurrentService.getResultFromMap(resultMap, callable2);
         System.out.println("callable2 result is -->" + result2);
         Integer result3 = concurrentService.getResultFromMap(resultMap, callable3);
         System.out.println("callable3 result is -->" + result3);
+        Void resultNull = concurrentService.getResultFromMap(resultMap, callableNull);
+        System.out.println("callableNull result is -->" + resultNull);
 
     }
 }

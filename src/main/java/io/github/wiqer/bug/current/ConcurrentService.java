@@ -146,25 +146,23 @@ public class ConcurrentService {
         return resultList;
     }
 
-    public  Map<Callable, Object> fetchCallableReturnResultMap(Callable... callables) {
+    public  Map<Callable<?>, Object> fetchCallableReturnResultMap(Callable<?>... callables) {
         Assert.notNull(callables , "can't newInstance by callables");
         int capacity = computeArrayListCapacity(callables.length);
-        ArrayList<Callable> list = new ArrayList(capacity);
+        ArrayList<Callable<?>> list = new ArrayList<>(capacity);
         Collections.addAll(list, callables);
         if(CollectionUtils.isEmpty(list)){
             return Collections.emptyMap();
         }
-        List<Future<Object>> futures = new ArrayList<>(callables.length);
-        Map<Future<Object>, Callable> futureMap = new HashMap<>();
-        for (Callable callable : list) {
-            Future future = executorService.submit(callable);
-            futures.add(future);
+        Map<Future<?>, Callable<?>> futureMap = new HashMap<>();
+        for (Callable<?> callable : list) {
+            Future<?> future = executorService.submit(callable);
             futureMap.put(future, callable);
         }
-        Map<Callable, Object> resultMap = new HashMap<>();
+        Map<Callable<?>, Object> resultMap = new HashMap<>();
 
-        for (Map.Entry<Future<Object>, Callable> entry: futureMap.entrySet()) {
-            Future<Object> future = entry.getKey();
+        for (Map.Entry<Future<?>, Callable<?>> entry: futureMap.entrySet()) {
+            Future<?> future = entry.getKey();
             try {
                 Object result = future.get();
                 if(result != null) {
@@ -179,8 +177,9 @@ public class ConcurrentService {
         }
         return resultMap;
     }
-     public <T> T getResultFromMap(Map<Callable, Object> resultMap, Callable<T> callable){
-        return (T) resultMap.get(callable);
+     public <T> T getResultFromMap(Map<Callable<?>, Object> resultMap, Callable<T> callable){
+        Object res =  resultMap.get(callable);
+        return  res == null ? null : (T)res;
     }
     static int computeArrayListCapacity(int arraySize) {
         Assert.checkNonnegative(arraySize, "arraySize");
