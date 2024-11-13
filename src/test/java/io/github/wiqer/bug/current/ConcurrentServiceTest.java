@@ -2,6 +2,8 @@ package io.github.wiqer.bug.current;
 
 import io.github.wiqer.bug.StarerTest;
 import io.github.wiqer.bug.start.BugStarter;
+import lombok.Data;
+import lombok.Getter;
 import org.junit.Test;
 
 import java.util.Map;
@@ -19,6 +21,19 @@ import java.util.concurrent.Executors;
  */
 public class ConcurrentServiceTest {
 
+    /**
+     *
+     *      * +-+
+     *      * |task1|---------------->|
+     *      * +-+                     |
+     *      *                         v
+     *      * +-+                    +-+  +-+   +-+            +-+  +-+
+     *      * |task2|----------->----|taskTestClass|------>|main task |----------->end
+     *      * +-+                   +-+  +-+   +-+       |     +-+  +-+
+     *      * +-+                         |             |
+     *      * |task3|----------->----|taskNull|----->---
+     *      * +-+                    +-+  +-+
+     */
     @Test
     public void testForConcurrentServiceTest() {
         ConcurrentService concurrentService
@@ -35,20 +50,41 @@ public class ConcurrentServiceTest {
             // 这里是你的任务3
             return 3;
         };
-        Callable<Void> callableNull = () -> {
-            // 这里是你的任务3
-            System.out.println("Result of Task3 is null");
-            return Void.TYPE.newInstance();
-        };
+
         Map<Callable<?>, Object> resultMap = concurrentService.fetchCallableReturnResultMap(callable1,  callable2, callable3);
+
         String result1 = concurrentService.getResultFromMap(resultMap, callable1);
         System.out.println("callable1 result is -->" + result1);
+
         String result2 = concurrentService.getResultFromMap(resultMap, callable2);
         System.out.println("callable2 result is -->" + result2);
+
         Integer result3 = concurrentService.getResultFromMap(resultMap, callable3);
         System.out.println("callable3 result is -->" + result3);
-        Void resultNull = concurrentService.getResultFromMap(resultMap, callableNull);
-        System.out.println("callableNull result is -->" + resultNull);
 
+        Callable<Void> callableNull = () -> {
+            System.out.println("Result of Task3 is null");
+            //此处会报错
+            return Void.TYPE.newInstance();
+        };
+
+        Callable<TestClass> callableTestClass = () -> {
+            TestClass tc = new TestClass();
+            tc.setName(result2);
+            tc.setId(result3);
+            return tc;
+        };
+        Map<Callable<?>, Object> step2ResultMap = concurrentService.fetchCallableReturnResultMap(callableNull, callableTestClass);
+        Void resultNull = concurrentService.getResultFromMap(step2ResultMap, callableNull);
+        System.out.println("callableNull result is -->" + resultNull);
+        TestClass TestClass = concurrentService.getResultFromMap(step2ResultMap, callableTestClass);
+        System.out.println("callableTestClass result is -->" + TestClass);
+
+    }
+
+    @Data
+    static class TestClass{
+        private Integer id;
+        private String name;
     }
 }
