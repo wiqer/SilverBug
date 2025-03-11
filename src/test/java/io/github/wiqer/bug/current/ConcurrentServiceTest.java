@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ：ConcurrentServiceTest
@@ -51,7 +52,7 @@ public class ConcurrentServiceTest {
             return 3;
         };
 
-        Map<Callable<?>, Object> resultMap = concurrentService.fetchCallableReturnResultMap(callable1,  callable2, callable3);
+        Map<Callable<?>, Object> resultMap = concurrentService.fetchCallableReturnResultMap(3, TimeUnit.SECONDS,callable1,  callable2, callable3);
 
         String result1 = concurrentService.getResultFromMap(resultMap, callable1);
         System.out.println("callable1 result is -->" + result1);
@@ -74,7 +75,7 @@ public class ConcurrentServiceTest {
             tc.setId(result3);
             return tc;
         };
-        Map<Callable<?>, Object> step2ResultMap = concurrentService.fetchCallableReturnResultMap(callableNull, callableTestClass);
+        Map<Callable<?>, Object> step2ResultMap = concurrentService.fetchCallableReturnResultMap(3, TimeUnit.SECONDS,callableNull, callableTestClass);
         Void resultNull = concurrentService.getResultFromMap(step2ResultMap, callableNull);
         System.out.println("callableNull result is -->" + resultNull);
         TestClass TestClass = concurrentService.getResultFromMap(step2ResultMap, callableTestClass);

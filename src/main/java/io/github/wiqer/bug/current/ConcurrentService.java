@@ -7,11 +7,9 @@ import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.collections4.MapUtils;
 
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,6 +32,33 @@ public class ConcurrentService {
     public ConcurrentService(ExecutorService executorService, String name) {
         this.executorService = executorService;
         this.name = name;
+    }
+    public <T> void fetchConsumerConcurrentList(Consumer<T> readFunction, List<T> list,int batchSize, long timeout, TimeUnit unit) {
+        if(CollectionUtils.isEmpty(list)){
+            return ;
+        }
+        final CountDownLatch latch = new CountDownLatch(batchSize);
+        for (T param : list) {
+            executorService.submit(() -> {
+                try {
+                    readFunction.accept(param);
+                }catch (Throwable e) {
+                    log.error(e.getMessage(), e);
+                }finally {
+                    latch.countDown();
+                }
+            });
+        }
+        try {
+            boolean finished = latch.await(timeout,unit);
+            if (finished){
+                log.info("{} finished concurrent fetch concurrent list", name);
+            }else {
+                log.warn("{} time out concurrent fetch concurrent list", name);
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public <T,R> List<R> fetchConcurrentList(Function<T,R> readFunction,List<T> list) {
@@ -64,7 +89,7 @@ public class ConcurrentService {
         return resultList;
     }
 
-    public <T,R> List<R> fetchConcurrentList(Function<List<T>,List<R>> readFunction,List<T> list,int batchSize) {
+    public <T,R> List<R> fetchConcurrentList(Function<List<T>,List<R>> readFunction,List<T> list,int batchSize, long timeout, TimeUnit unit) {
         if(batchSize < 1 || CollectionUtils.isEmpty(list)){
             return Collections.emptyList();
         }
@@ -77,12 +102,14 @@ public class ConcurrentService {
         List<R> resultList = new ArrayList<>();
         for (Future<List<R>> future : futures) {
             try {
-                List<R> result = future.get();
+                List<R> result = future.get(timeout, unit);
                 if(CollectionUtils.isNotEmpty(result)){
                     resultList.addAll(result);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(name, e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
         if(CollectionUtils.isEmpty(resultList)){
@@ -91,7 +118,7 @@ public class ConcurrentService {
         return new ArrayList<>(resultList);
     }
 
-    public <T,R,U> List<R> fetchConcurrentList(BiFunction<List<T>,U,List<R>> readBiFunction, List<T> list,U conditionParam, int batchSize) {
+    public <T,R,U> List<R> fetchConcurrentList(BiFunction<List<T>,U,List<R>> readBiFunction, List<T> list,U conditionParam, int batchSize, long timeout, TimeUnit unit) {
         if(batchSize < 1 || CollectionUtils.isEmpty(list)){
             return Collections.emptyList();
         }
@@ -104,12 +131,14 @@ public class ConcurrentService {
         List<R> resultList = new ArrayList<>(list.size());
         for (Future<List<R>> future : futures) {
             try {
-                List<R> result = future.get();
+                List<R> result = future.get(timeout, unit);
                 if(CollectionUtils.isNotEmpty(result)){
                     resultList.addAll(result);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(name, e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
         if(CollectionUtils.isEmpty(resultList)){
@@ -118,7 +147,7 @@ public class ConcurrentService {
         return new ArrayList<>(resultList);
     }
 
-    public <T,R,U> Map<String,R> fetchConcurrentStringKeyMap(BiFunction<List<T>,U,Map<String,R>> readBiFunction, List<T> list, U conditionParam, int batchSize) {
+    public <T,R,U> Map<String,R> fetchConcurrentStringKeyMap(BiFunction<List<T>,U,Map<String,R>> readBiFunction, List<T> list, U conditionParam, int batchSize, long timeout, TimeUnit unit) {
         if(batchSize < 1 || CollectionUtils.isEmpty(list)){
             return Collections.emptyMap();
         }
@@ -132,12 +161,14 @@ public class ConcurrentService {
         Map<String,R> resultList = new HashMap<>(list.size());
         for (Future<Map<String,R>> future : futures) {
             try {
-                Map<String,R> result = future.get();
+                Map<String,R> result = future.get(timeout, unit);
                 if(MapUtils.isNotEmpty(result)){
                     resultList.putAll(result);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(name, e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
         if(MapUtils.isEmpty(resultList)){
@@ -146,7 +177,7 @@ public class ConcurrentService {
         return resultList;
     }
 
-    public  Map<Callable<?>, Object> fetchCallableReturnResultMap(Callable<?>... callables) {
+    public  Map<Callable<?>, Object> fetchCallableReturnResultMap(long timeout, TimeUnit unit, Callable<?>... callables) {
         Assert.notNull(callables , "can't newInstance by callables");
         int capacity = computeArrayListCapacity(callables.length);
         ArrayList<Callable<?>> list = new ArrayList<>(capacity);
@@ -164,12 +195,14 @@ public class ConcurrentService {
         for (Map.Entry<Future<?>, Callable<?>> entry: futureMap.entrySet()) {
             Future<?> future = entry.getKey();
             try {
-                Object result = future.get();
+                Object result = future.get(timeout, unit);
                 if(result != null) {
                     resultMap.put(entry.getValue(), result);
                 }
             } catch (InterruptedException | ExecutionException e) {
                 log.error(name, e);
+            } catch (TimeoutException e) {
+                throw new RuntimeException(e);
             }
         }
         if(MapUtils.isEmpty(resultMap)){
