@@ -255,9 +255,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         final int hash;
         final K key;
         V value;
-        SilverHashMap.Node<K,V> next;
+        Node<K,V> next;
 
-        Node(int hash, K key, V value, SilverHashMap.Node<K,V> next) {
+        Node(int hash, K key, V value, Node<K,V> next) {
             this.hash = hash;
             this.key = key;
             this.value = value;
@@ -368,7 +368,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * (We also tolerate length zero in some operations to allow
      * bootstrapping mechanics that are currently not needed.)
      */
-    transient SilverHashMap.Node<K,V>[] table;
+    transient Node<K,V>[] table;
 
     /**
      * Holds cached entrySet(). Note that AbstractMap fields are used
@@ -528,7 +528,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * @see #put(Object, Object)
      */
     public V get(Object key) {
-        SilverHashMap.Node<K,V> e;
+        Node<K,V> e;
         return (e = getNode(hash(key), key)) == null ? null : e.value;
     }
 
@@ -539,16 +539,16 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * @param key the key
      * @return the node, or null if none
      */
-    final SilverHashMap.Node<K,V> getNode(int hash, Object key) {
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> first, e; int n; K k;
+    final Node<K,V> getNode(int hash, Object key) {
+        Node<K,V>[] tab; Node<K,V> first, e; int n; K k;
         if ((tab = table) != null && (n = tab.length) > 0 &&
                 (first = tab[(n - 1) & hash]) != null) {
             if (first.hash == hash && // always check first node
                     ((k = first.key) == key || (key != null && key.equals(k))))
                 return first;
             if ((e = first.next) != null) {
-                if (first instanceof SilverHashMap.TreeNode)
-                    return ((SilverHashMap.TreeNode<K,V>)first).getTreeNode(hash, key);
+                if (first instanceof TreeNode)
+                    return ((TreeNode<K,V>)first).getTreeNode(hash, key);
                 do {
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k))))
@@ -599,18 +599,18 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      */
     final V putVal(int hash, K key, V value, boolean onlyIfAbsent,
                    boolean evict) {
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> p; int n, i;
+        Node<K,V>[] tab; Node<K,V> p; int n, i;
         if ((tab = table) == null || (n = tab.length) == 0)
             n = (tab = resize()).length;
         if ((p = tab[i = (n - 1) & hash]) == null)
             tab[i] = newNode(hash, key, value, null);
         else {
-            SilverHashMap.Node<K,V> e; K k;
+            Node<K,V> e; K k;
             if (p.hash == hash &&
                     ((k = p.key) == key || (key != null && key.equals(k))))
                 e = p;
-            else if (p instanceof SilverHashMap.TreeNode)
-                e = ((SilverHashMap.TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
+            else if (p instanceof TreeNode)
+                e = ((TreeNode<K,V>)p).putTreeVal(this, tab, hash, key, value);
             else {
                 for (int binCount = 0; ; ++binCount) {
                     if ((e = p.next) == null) {
@@ -649,8 +649,8 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      *
      * @return the table
      */
-    final SilverHashMap.Node<K,V>[] resize() {
-        SilverHashMap.Node<K,V>[] oldTab = table;
+    final Node<K,V>[] resize() {
+        Node<K,V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
         int oldThr = threshold;
         int newCap, newThr = 0;
@@ -676,21 +676,21 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         }
         threshold = newThr;
         @SuppressWarnings({"rawtypes","unchecked"})
-        SilverHashMap.Node<K,V>[] newTab = (SilverHashMap.Node<K,V>[])new SilverHashMap.Node[newCap];
+        Node<K,V>[] newTab = (Node<K,V>[])new Node[newCap];
         table = newTab;
         if (oldTab != null) {
             for (int j = 0; j < oldCap; ++j) {
-                SilverHashMap.Node<K,V> e;
+                Node<K,V> e;
                 if ((e = oldTab[j]) != null) {
                     oldTab[j] = null;
                     if (e.next == null)
                         newTab[e.hash & (newCap - 1)] = e;
-                    else if (e instanceof SilverHashMap.TreeNode)
-                        ((SilverHashMap.TreeNode<K,V>)e).split(this, newTab, j, oldCap);
+                    else if (e instanceof TreeNode)
+                        ((TreeNode<K,V>)e).split(this, newTab, j, oldCap);
                     else { // preserve order
-                        SilverHashMap.Node<K,V> loHead = null, loTail = null;
-                        SilverHashMap.Node<K,V> hiHead = null, hiTail = null;
-                        SilverHashMap.Node<K,V> next;
+                        Node<K,V> loHead = null, loTail = null;
+                        Node<K,V> hiHead = null, hiTail = null;
+                        Node<K,V> next;
                         do {
                             next = e.next;
                             if ((e.hash & oldCap) == 0) {
@@ -727,14 +727,14 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * Replaces all linked nodes in bin at index for given hash unless
      * table is too small, in which case resizes instead.
      */
-    final void treeifyBin(SilverHashMap.Node<K,V>[] tab, int hash) {
-        int n, index; SilverHashMap.Node<K,V> e;
+    final void treeifyBin(Node<K,V>[] tab, int hash) {
+        int n, index; Node<K,V> e;
         if (tab == null || (n = tab.length) < MIN_TREEIFY_CAPACITY)
             resize();
         else if ((e = tab[index = (n - 1) & hash]) != null) {
-            SilverHashMap.TreeNode<K,V> hd = null, tl = null;
+            TreeNode<K,V> hd = null, tl = null;
             do {
-                SilverHashMap.TreeNode<K,V> p = replacementTreeNode(e, null);
+                TreeNode<K,V> p = replacementTreeNode(e, null);
                 if (tl == null)
                     hd = p;
                 else {
@@ -770,7 +770,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      *         previously associated <tt>null</tt> with <tt>key</tt>.)
      */
     public V remove(Object key) {
-        SilverHashMap.Node<K,V> e;
+        Node<K,V> e;
         return (e = removeNode(hash(key), key, null, false, true)) == null ?
                 null : e.value;
     }
@@ -785,18 +785,18 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * @param movable if false do not move other nodes while removing
      * @return the node, or null if none
      */
-    final SilverHashMap.Node<K,V> removeNode(int hash, Object key, Object value,
+    final Node<K,V> removeNode(int hash, Object key, Object value,
                                                  boolean matchValue, boolean movable) {
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> p; int n, index;
+        Node<K,V>[] tab; Node<K,V> p; int n, index;
         if ((tab = table) != null && (n = tab.length) > 0 &&
                 (p = tab[index = (n - 1) & hash]) != null) {
-            SilverHashMap.Node<K,V> node = null, e; K k; V v;
+            Node<K,V> node = null, e; K k; V v;
             if (p.hash == hash &&
                     ((k = p.key) == key || (key != null && key.equals(k))))
                 node = p;
             else if ((e = p.next) != null) {
-                if (p instanceof SilverHashMap.TreeNode)
-                    node = ((SilverHashMap.TreeNode<K,V>)p).getTreeNode(hash, key);
+                if (p instanceof TreeNode)
+                    node = ((TreeNode<K,V>)p).getTreeNode(hash, key);
                 else {
                     do {
                         if (e.hash == hash &&
@@ -811,8 +811,8 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             }
             if (node != null && (!matchValue || (v = node.value) == value ||
                     (value != null && value.equals(v)))) {
-                if (node instanceof SilverHashMap.TreeNode)
-                    ((SilverHashMap.TreeNode<K,V>)node).removeTreeNode(this, tab, movable);
+                if (node instanceof TreeNode)
+                    ((TreeNode<K,V>)node).removeTreeNode(this, tab, movable);
                 else if (node == p)
                     tab[index] = node.next;
                 else
@@ -831,7 +831,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * The map will be empty after this call returns.
      */
     public void clear() {
-        SilverHashMap.Node<K,V>[] tab;
+        Node<K,V>[] tab;
         modCount++;
         if ((tab = table) != null && size > 0) {
             size = 0;
@@ -849,10 +849,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      *         specified value
      */
     public boolean containsValue(Object value) {
-        SilverHashMap.Node<K,V>[] tab; V v;
+        Node<K,V>[] tab; V v;
         if ((tab = table) != null && size > 0) {
             for (int i = 0; i < tab.length; ++i) {
-                for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next) {
+                for (Node<K,V> e = tab[i]; e != null; e = e.next) {
                     if ((v = e.value) == value ||
                             (value != null && value.equals(v)))
                         return true;
@@ -880,7 +880,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     public Set<K> keySet() {
         Set<K> ks = keySet;
         if (ks == null) {
-            ks = new SilverHashMap.KeySet();
+            ks = new KeySet();
             keySet = ks;
         }
         return ks;
@@ -888,23 +888,23 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     final class KeySet extends AbstractSet<K> {
         public final int size()                 { return size; }
-        public final void clear()               { SilverHashMap.this.clear(); }
-        public final Iterator<K> iterator()     { return new SilverHashMap.KeyIterator(); }
+        public final void clear()               { this.clear(); }
+        public final Iterator<K> iterator()     { return new KeyIterator(); }
         public final boolean contains(Object o) { return containsKey(o); }
         public final boolean remove(Object key) {
             return removeNode(hash(key), key, null, false, true) != null;
         }
         public final Spliterator<K> spliterator() {
-            return new SilverHashMap.KeySpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
+            return new KeySpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
         }
         public final void forEach(Consumer<? super K> action) {
-            SilverHashMap.Node<K,V>[] tab;
+            Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
             if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
                 for (int i = 0; i < tab.length; ++i) {
-                    for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next)
+                    for (Node<K,V> e = tab[i]; e != null; e = e.next)
                         action.accept(e.key);
                 }
                 if (modCount != mc)
@@ -931,7 +931,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     public Collection<V> values() {
         Collection<V> vs = values;
         if (vs == null) {
-            vs = new SilverHashMap.Values();
+            vs = new Values();
             values = vs;
         }
         return vs;
@@ -939,20 +939,20 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     final class Values extends AbstractCollection<V> {
         public final int size()                 { return size; }
-        public final void clear()               { SilverHashMap.this.clear(); }
-        public final Iterator<V> iterator()     { return new SilverHashMap.ValueIterator(); }
+        public final void clear()               { this.clear(); }
+        public final Iterator<V> iterator()     { return new ValueIterator(); }
         public final boolean contains(Object o) { return containsValue(o); }
         public final Spliterator<V> spliterator() {
-            return new SilverHashMap.ValueSpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
+            return new ValueSpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
         }
         public final void forEach(Consumer<? super V> action) {
-            SilverHashMap.Node<K,V>[] tab;
+            Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
             if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
                 for (int i = 0; i < tab.length; ++i) {
-                    for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next)
+                    for (Node<K,V> e = tab[i]; e != null; e = e.next)
                         action.accept(e.value);
                 }
                 if (modCount != mc)
@@ -979,21 +979,21 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      */
     public Set<Map.Entry<K,V>> entrySet() {
         Set<Map.Entry<K,V>> es;
-        return (es = entrySet) == null ? (entrySet = new SilverHashMap.EntrySet()) : es;
+        return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;
     }
 
     final class EntrySet extends AbstractSet<Map.Entry<K,V>> {
         public final int size()                 { return size; }
-        public final void clear()               { SilverHashMap.this.clear(); }
+        public final void clear()               { this.clear(); }
         public final Iterator<Map.Entry<K,V>> iterator() {
-            return new SilverHashMap.EntryIterator();
+            return new EntryIterator();
         }
         public final boolean contains(Object o) {
             if (!(o instanceof Map.Entry))
                 return false;
             Map.Entry<?,?> e = (Map.Entry<?,?>) o;
             Object key = e.getKey();
-            SilverHashMap.Node<K,V> candidate = getNode(hash(key), key);
+            Node<K,V> candidate = getNode(hash(key), key);
             return candidate != null && candidate.equals(e);
         }
         public final boolean remove(Object o) {
@@ -1006,16 +1006,16 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             return false;
         }
         public final Spliterator<Map.Entry<K,V>> spliterator() {
-            return new SilverHashMap.EntrySpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
+            return new EntrySpliterator<>(SilverHashMap.this, 0, -1, 0, 0);
         }
         public final void forEach(Consumer<? super Map.Entry<K,V>> action) {
-            SilverHashMap.Node<K,V>[] tab;
+            Node<K,V>[] tab;
             if (action == null)
                 throw new NullPointerException();
             if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
                 for (int i = 0; i < tab.length; ++i) {
-                    for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next)
+                    for (Node<K,V> e = tab[i]; e != null; e = e.next)
                         action.accept(e);
                 }
                 if (modCount != mc)
@@ -1028,7 +1028,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     public V getOrDefault(Object key, V defaultValue) {
-        SilverHashMap.Node<K,V> e;
+        Node<K,V> e;
         return (e = getNode(hash(key), key)) == null ? defaultValue : e.value;
     }
 
@@ -1044,7 +1044,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        SilverHashMap.Node<K,V> e; V v;
+        Node<K,V> e; V v;
         if ((e = getNode(hash(key), key)) != null &&
                 ((v = e.value) == oldValue || (v != null && v.equals(oldValue)))) {
             e.value = newValue;
@@ -1056,7 +1056,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     public V replace(K key, V value) {
-        SilverHashMap.Node<K,V> e;
+        Node<K,V> e;
         if ((e = getNode(hash(key), key)) != null) {
             V oldValue = e.value;
             e.value = value;
@@ -1072,18 +1072,18 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         if (mappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> first; int n, i;
+        Node<K,V>[] tab; Node<K,V> first; int n, i;
         int binCount = 0;
-        SilverHashMap.TreeNode<K,V> t = null;
-        SilverHashMap.Node<K,V> old = null;
+        TreeNode<K,V> t = null;
+        Node<K,V> old = null;
         if (size > threshold || (tab = table) == null ||
                 (n = tab.length) == 0)
             n = (tab = resize()).length;
         if ((first = tab[i = (n - 1) & hash]) != null) {
-            if (first instanceof SilverHashMap.TreeNode)
-                old = (t = (SilverHashMap.TreeNode<K,V>)first).getTreeNode(hash, key);
+            if (first instanceof TreeNode)
+                old = (t = (TreeNode<K,V>)first).getTreeNode(hash, key);
             else {
-                SilverHashMap.Node<K,V> e = first; K k;
+                Node<K,V> e = first; K k;
                 do {
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k)))) {
@@ -1124,7 +1124,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                               BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
         if (remappingFunction == null)
             throw new NullPointerException();
-        SilverHashMap.Node<K,V> e; V oldValue;
+        Node<K,V> e; V oldValue;
         int hash = hash(key);
         if ((e = getNode(hash, key)) != null &&
                 (oldValue = e.value) != null) {
@@ -1146,18 +1146,18 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         if (remappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> first; int n, i;
+        Node<K,V>[] tab; Node<K,V> first; int n, i;
         int binCount = 0;
-        SilverHashMap.TreeNode<K,V> t = null;
-        SilverHashMap.Node<K,V> old = null;
+        TreeNode<K,V> t = null;
+        Node<K,V> old = null;
         if (size > threshold || (tab = table) == null ||
                 (n = tab.length) == 0)
             n = (tab = resize()).length;
         if ((first = tab[i = (n - 1) & hash]) != null) {
-            if (first instanceof SilverHashMap.TreeNode)
-                old = (t = (SilverHashMap.TreeNode<K,V>)first).getTreeNode(hash, key);
+            if (first instanceof TreeNode)
+                old = (t = (TreeNode<K,V>)first).getTreeNode(hash, key);
             else {
-                SilverHashMap.Node<K,V> e = first; K k;
+                Node<K,V> e = first; K k;
                 do {
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k)))) {
@@ -1201,18 +1201,18 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         if (remappingFunction == null)
             throw new NullPointerException();
         int hash = hash(key);
-        SilverHashMap.Node<K,V>[] tab; SilverHashMap.Node<K,V> first; int n, i;
+        Node<K,V>[] tab; Node<K,V> first; int n, i;
         int binCount = 0;
-        SilverHashMap.TreeNode<K,V> t = null;
-        SilverHashMap.Node<K,V> old = null;
+        TreeNode<K,V> t = null;
+        Node<K,V> old = null;
         if (size > threshold || (tab = table) == null ||
                 (n = tab.length) == 0)
             n = (tab = resize()).length;
         if ((first = tab[i = (n - 1) & hash]) != null) {
-            if (first instanceof SilverHashMap.TreeNode)
-                old = (t = (SilverHashMap.TreeNode<K,V>)first).getTreeNode(hash, key);
+            if (first instanceof TreeNode)
+                old = (t = (TreeNode<K,V>)first).getTreeNode(hash, key);
             else {
-                SilverHashMap.Node<K,V> e = first; K k;
+                Node<K,V> e = first; K k;
                 do {
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k)))) {
@@ -1254,13 +1254,13 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
-        SilverHashMap.Node<K,V>[] tab;
+        Node<K,V>[] tab;
         if (action == null)
             throw new NullPointerException();
         if (size > 0 && (tab = table) != null) {
             int mc = modCount;
             for (int i = 0; i < tab.length; ++i) {
-                for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next)
+                for (Node<K,V> e = tab[i]; e != null; e = e.next)
                     action.accept(e.key, e.value);
             }
             if (modCount != mc)
@@ -1270,13 +1270,13 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     @Override
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        SilverHashMap.Node<K,V>[] tab;
+        Node<K,V>[] tab;
         if (function == null)
             throw new NullPointerException();
         if (size > 0 && (tab = table) != null) {
             int mc = modCount;
             for (int i = 0; i < tab.length; ++i) {
-                for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next) {
+                for (Node<K,V> e = tab[i]; e != null; e = e.next) {
                     e.value = function.apply(e.key, e.value);
                 }
             }
@@ -1310,14 +1310,14 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     }
 
     abstract class HashIterator {
-        SilverHashMap.Node<K,V> next;        // next entry to return
-        SilverHashMap.Node<K,V> current;     // current entry
+        Node<K,V> next;        // next entry to return
+        Node<K,V> current;     // current entry
         int expectedModCount;  // for fast-fail
         int index;             // current slot
 
         HashIterator() {
             expectedModCount = modCount;
-            SilverHashMap.Node<K,V>[] t = table;
+            Node<K,V>[] t = table;
             current = next = null;
             index = 0;
             if (t != null && size > 0) { // advance to first entry
@@ -1329,9 +1329,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             return next != null;
         }
 
-        final SilverHashMap.Node<K,V> nextNode() {
-            SilverHashMap.Node<K,V>[] t;
-            SilverHashMap.Node<K,V> e = next;
+        final Node<K,V> nextNode() {
+            Node<K,V>[] t;
+            Node<K,V> e = next;
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             if (e == null)
@@ -1343,7 +1343,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         }
 
         public final void remove() {
-            SilverHashMap.Node<K,V> p = current;
+            Node<K,V> p = current;
             if (p == null)
                 throw new IllegalStateException();
             if (modCount != expectedModCount)
@@ -1365,7 +1365,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         public final V next() { return nextNode().value; }
     }
 
-    final class EntryIterator extends SilverHashMap.HashIterator
+    final class EntryIterator extends HashIterator
             implements Iterator<Map.Entry<K,V>> {
         public final Map.Entry<K,V> next() { return nextNode(); }
     }
@@ -1375,7 +1375,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
 
     static class SilverHashMapSpliterator<K,V> {
         final SilverHashMap<K,V> map;
-        SilverHashMap.Node<K,V> current;          // current node
+        Node<K,V> current;          // current node
         int index;                  // current index, modified on advance/split
         int fence;                  // one past last index
         int est;                    // size estimate
@@ -1397,7 +1397,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 SilverHashMap<K,V> m = map;
                 est = m.size;
                 expectedModCount = m.modCount;
-                SilverHashMap.Node<K,V>[] tab = m.table;
+                Node<K,V>[] tab = m.table;
                 hi = fence = (tab == null) ? 0 : tab.length;
             }
             return hi;
@@ -1410,17 +1410,17 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     }
 
     static final class KeySpliterator<K,V>
-            extends SilverHashMap.SilverHashMapSpliterator<K,V>
+            extends SilverHashMapSpliterator<K,V>
             implements Spliterator<K> {
         KeySpliterator(SilverHashMap<K,V> m, int origin, int fence, int est,
                        int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
 
-        public SilverHashMap.KeySpliterator<K,V> trySplit() {
+        public KeySpliterator<K,V> trySplit() {
             int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
             return (lo >= mid || current != null) ? null :
-                    new SilverHashMap.KeySpliterator<>(map, lo, index = mid, est >>>= 1,
+                    new KeySpliterator<>(map, lo, index = mid, est >>>= 1,
                             expectedModCount);
         }
 
@@ -1429,7 +1429,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             if (action == null)
                 throw new NullPointerException();
             SilverHashMap<K,V> m = map;
-            SilverHashMap.Node<K,V>[] tab = m.table;
+            Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1438,7 +1438,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 mc = expectedModCount;
             if (tab != null && tab.length >= hi &&
                     (i = index) >= 0 && (i < (index = hi) || current != null)) {
-                SilverHashMap.Node<K,V> p = current;
+                Node<K,V> p = current;
                 current = null;
                 do {
                     if (p == null)
@@ -1457,7 +1457,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            SilverHashMap.Node<K,V>[] tab = map.table;
+            Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
@@ -1482,17 +1482,17 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     }
 
     static final class ValueSpliterator<K,V>
-            extends SilverHashMap.SilverHashMapSpliterator<K,V>
+            extends SilverHashMapSpliterator<K,V>
             implements Spliterator<V> {
         ValueSpliterator(SilverHashMap<K,V> m, int origin, int fence, int est,
                          int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
 
-        public SilverHashMap.ValueSpliterator<K,V> trySplit() {
+        public ValueSpliterator<K,V> trySplit() {
             int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
             return (lo >= mid || current != null) ? null :
-                    new SilverHashMap.ValueSpliterator<>(map, lo, index = mid, est >>>= 1,
+                    new ValueSpliterator<>(map, lo, index = mid, est >>>= 1,
                             expectedModCount);
         }
 
@@ -1501,7 +1501,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             if (action == null)
                 throw new NullPointerException();
             SilverHashMap<K,V> m = map;
-            SilverHashMap.Node<K,V>[] tab = m.table;
+            Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1510,7 +1510,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 mc = expectedModCount;
             if (tab != null && tab.length >= hi &&
                     (i = index) >= 0 && (i < (index = hi) || current != null)) {
-                SilverHashMap.Node<K,V> p = current;
+                Node<K,V> p = current;
                 current = null;
                 do {
                     if (p == null)
@@ -1529,7 +1529,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            SilverHashMap.Node<K,V>[] tab = map.table;
+            Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
@@ -1553,17 +1553,17 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     }
 
     static final class EntrySpliterator<K,V>
-            extends SilverHashMap.SilverHashMapSpliterator<K,V>
+            extends SilverHashMapSpliterator<K,V>
             implements Spliterator<Map.Entry<K,V>> {
         EntrySpliterator(SilverHashMap<K,V> m, int origin, int fence, int est,
                          int expectedModCount) {
             super(m, origin, fence, est, expectedModCount);
         }
 
-        public SilverHashMap.EntrySpliterator<K,V> trySplit() {
+        public EntrySpliterator<K,V> trySplit() {
             int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;
             return (lo >= mid || current != null) ? null :
-                    new SilverHashMap.EntrySpliterator<>(map, lo, index = mid, est >>>= 1,
+                    new EntrySpliterator<>(map, lo, index = mid, est >>>= 1,
                             expectedModCount);
         }
 
@@ -1572,7 +1572,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             if (action == null)
                 throw new NullPointerException();
             SilverHashMap<K,V> m = map;
-            SilverHashMap.Node<K,V>[] tab = m.table;
+            Node<K,V>[] tab = m.table;
             if ((hi = fence) < 0) {
                 mc = expectedModCount = m.modCount;
                 hi = fence = (tab == null) ? 0 : tab.length;
@@ -1581,7 +1581,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 mc = expectedModCount;
             if (tab != null && tab.length >= hi &&
                     (i = index) >= 0 && (i < (index = hi) || current != null)) {
-                SilverHashMap.Node<K,V> p = current;
+                Node<K,V> p = current;
                 current = null;
                 do {
                     if (p == null)
@@ -1600,13 +1600,13 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             int hi;
             if (action == null)
                 throw new NullPointerException();
-            SilverHashMap.Node<K,V>[] tab = map.table;
+            Node<K,V>[] tab = map.table;
             if (tab != null && tab.length >= (hi = getFence()) && index >= 0) {
                 while (current != null || index < hi) {
                     if (current == null)
                         current = tab[index++];
                     else {
-                        SilverHashMap.Node<K,V> e = current;
+                        Node<K,V> e = current;
                         current = current.next;
                         action.accept(e);
                         if (map.modCount != expectedModCount)
@@ -1637,23 +1637,23 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      */
 
     // Create a regular (non-tree) node
-    SilverHashMap.Node<K,V> newNode(int hash, K key, V value, SilverHashMap.Node<K,V> next) {
-        return new SilverHashMap.Node<>(hash, key, value, next);
+    Node<K,V> newNode(int hash, K key, V value, Node<K,V> next) {
+        return new Node<>(hash, key, value, next);
     }
 
     // For conversion from TreeNodes to plain nodes
-    SilverHashMap.Node<K,V> replacementNode(SilverHashMap.Node<K,V> p, SilverHashMap.Node<K,V> next) {
-        return new SilverHashMap.Node<>(p.hash, p.key, p.value, next);
+    Node<K,V> replacementNode(Node<K,V> p, Node<K,V> next) {
+        return new Node<>(p.hash, p.key, p.value, next);
     }
 
     // Create a tree bin node
-    SilverHashMap.TreeNode<K,V> newTreeNode(int hash, K key, V value, SilverHashMap.Node<K,V> next) {
-        return new SilverHashMap.TreeNode<>(hash, key, value, next);
+    TreeNode<K,V> newTreeNode(int hash, K key, V value, Node<K,V> next) {
+        return new TreeNode<>(hash, key, value, next);
     }
 
     // For treeifyBin
-    SilverHashMap.TreeNode<K,V> replacementTreeNode(SilverHashMap.Node<K,V> p, SilverHashMap.Node<K,V> next) {
-        return new SilverHashMap.TreeNode<>(p.hash, p.key, p.value, next);
+    TreeNode<K,V> replacementTreeNode(Node<K,V> p, Node<K,V> next) {
+        return new TreeNode<>(p.hash, p.key, p.value, next);
     }
     transient Set<K>        keySet;
     transient Collection<V> values;
@@ -1671,16 +1671,16 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
     }
 
     // Callbacks to allow LinkedHashMap post-actions
-    void afterNodeAccess(SilverHashMap.Node<K,V> p) { }
+    void afterNodeAccess(Node<K,V> p) { }
     void afterNodeInsertion(boolean evict) { }
-    void afterNodeRemoval(SilverHashMap.Node<K,V> p) { }
+    void afterNodeRemoval(Node<K,V> p) { }
 
     // Called only from writeObject, to ensure compatible ordering.
     void internalWriteEntries(java.io.ObjectOutputStream s) throws IOException {
-        SilverHashMap.Node<K,V>[] tab;
+        Node<K,V>[] tab;
         if (size > 0 && (tab = table) != null) {
             for (int i = 0; i < tab.length; ++i) {
-                for (SilverHashMap.Node<K,V> e = tab[i]; e != null; e = e.next) {
+                for (Node<K,V> e = tab[i]; e != null; e = e.next) {
                     s.writeObject(e.key);
                     s.writeObject(e.value);
                 }
@@ -1703,20 +1703,20 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
      * linked node.
      */
     static final class TreeNode<K,V> extends Entry<K,V> {
-        SilverHashMap.TreeNode<K,V> parent;  // red-black tree links
-        SilverHashMap.TreeNode<K,V> left;
-        SilverHashMap.TreeNode<K,V> right;
-        SilverHashMap.TreeNode<K,V> prev;    // needed to unlink next upon deletion
+        TreeNode<K,V> parent;  // red-black tree links
+        TreeNode<K,V> left;
+        TreeNode<K,V> right;
+        TreeNode<K,V> prev;    // needed to unlink next upon deletion
         boolean red;
-        TreeNode(int hash, K key, V val, SilverHashMap.Node<K,V> next) {
+        TreeNode(int hash, K key, V val, Node<K,V> next) {
             super(hash, key, val, next);
         }
 
         /**
          * Returns root of tree containing this node.
          */
-        final SilverHashMap.TreeNode<K,V> root() {
-            for (SilverHashMap.TreeNode<K,V> r = this, p;;) {
+        final TreeNode<K,V> root() {
+            for (TreeNode<K,V> r = this, p;;) {
                 if ((p = r.parent) == null)
                     return r;
                 r = p;
@@ -1726,17 +1726,17 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /**
          * Ensures that the given root is the first node of its bin.
          */
-        static <K,V> void moveRootToFront(SilverHashMap.Node<K,V>[] tab, SilverHashMap.TreeNode<K,V> root) {
+        static <K,V> void moveRootToFront(Node<K,V>[] tab, TreeNode<K,V> root) {
             int n;
             if (root != null && tab != null && (n = tab.length) > 0) {
                 int index = (n - 1) & root.hash;
-                SilverHashMap.TreeNode<K,V> first = (SilverHashMap.TreeNode<K,V>)tab[index];
+                TreeNode<K,V> first = (TreeNode<K,V>)tab[index];
                 if (root != first) {
-                    SilverHashMap.Node<K,V> rn;
+                    Node<K,V> rn;
                     tab[index] = root;
-                    SilverHashMap.TreeNode<K,V> rp = root.prev;
+                    TreeNode<K,V> rp = root.prev;
                     if ((rn = root.next) != null)
-                        ((SilverHashMap.TreeNode<K,V>)rn).prev = rp;
+                        ((TreeNode<K,V>)rn).prev = rp;
                     if (rp != null)
                         rp.next = rn;
                     if (first != null)
@@ -1753,11 +1753,11 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
          * The kc argument caches comparableClassFor(key) upon first use
          * comparing keys.
          */
-        final SilverHashMap.TreeNode<K,V> find(int h, Object k, Class<?> kc) {
-            SilverHashMap.TreeNode<K,V> p = this;
+        final TreeNode<K,V> find(int h, Object k, Class<?> kc) {
+            TreeNode<K,V> p = this;
             do {
                 int ph, dir; K pk;
-                SilverHashMap.TreeNode<K,V> pl = p.left, pr = p.right, q;
+                TreeNode<K,V> pl = p.left, pr = p.right, q;
                 if ((ph = p.hash) > h)
                     p = pl;
                 else if (ph < h)
@@ -1783,7 +1783,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /**
          * Calls find for root node.
          */
-        final SilverHashMap.TreeNode<K,V> getTreeNode(int h, Object k) {
+        final TreeNode<K,V> getTreeNode(int h, Object k) {
             return ((parent != null) ? root() : this).find(h, k, null);
         }
 
@@ -1807,10 +1807,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /**
          * Forms tree of the nodes linked from this node.
          */
-        final void treeify(SilverHashMap.Node<K,V>[] tab) {
-            SilverHashMap.TreeNode<K,V> root = null;
-            for (SilverHashMap.TreeNode<K,V> x = this, next; x != null; x = next) {
-                next = (SilverHashMap.TreeNode<K,V>)x.next;
+        final void treeify(Node<K,V>[] tab) {
+            TreeNode<K,V> root = null;
+            for (TreeNode<K,V> x = this, next; x != null; x = next) {
+                next = (TreeNode<K,V>)x.next;
                 x.left = x.right = null;
                 if (root == null) {
                     x.parent = null;
@@ -1821,7 +1821,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                     K k = x.key;
                     int h = x.hash;
                     Class<?> kc = null;
-                    for (SilverHashMap.TreeNode<K,V> p = root;;) {
+                    for (TreeNode<K,V> p = root;;) {
                         int dir, ph;
                         K pk = p.key;
                         if ((ph = p.hash) > h)
@@ -1833,7 +1833,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                                 (dir = compareComparables(kc, k, pk)) == 0)
                             dir = tieBreakOrder(k, pk);
 
-                        SilverHashMap.TreeNode<K,V> xp = p;
+                        TreeNode<K,V> xp = p;
                         if ((p = (dir <= 0) ? p.left : p.right) == null) {
                             x.parent = xp;
                             if (dir <= 0)
@@ -1853,10 +1853,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
          * Returns a list of non-TreeNodes replacing those linked from
          * this node.
          */
-        final SilverHashMap.Node<K,V> untreeify(SilverHashMap<K,V> map) {
-            SilverHashMap.Node<K,V> hd = null, tl = null;
-            for (SilverHashMap.Node<K,V> q = this; q != null; q = q.next) {
-                SilverHashMap.Node<K,V> p = map.replacementNode(q, null);
+        final Node<K,V> untreeify(SilverHashMap<K,V> map) {
+            Node<K,V> hd = null, tl = null;
+            for (Node<K,V> q = this; q != null; q = q.next) {
+                Node<K,V> p = map.replacementNode(q, null);
                 if (tl == null)
                     hd = p;
                 else
@@ -1869,12 +1869,12 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /**
          * Tree version of putVal.
          */
-        final SilverHashMap.TreeNode<K,V> putTreeVal(SilverHashMap<K,V> map, SilverHashMap.Node<K,V>[] tab,
+        final TreeNode<K,V> putTreeVal(SilverHashMap<K,V> map, Node<K,V>[] tab,
                                                          int h, K k, V v) {
             Class<?> kc = null;
             boolean searched = false;
-            SilverHashMap.TreeNode<K,V> root = (parent != null) ? root() : this;
-            for (SilverHashMap.TreeNode<K,V> p = root;;) {
+            TreeNode<K,V> root = (parent != null) ? root() : this;
+            for (TreeNode<K,V> p = root;;) {
                 int dir, ph; K pk;
                 if ((ph = p.hash) > h)
                     dir = -1;
@@ -1886,7 +1886,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                         (kc = comparableClassFor(k)) == null) ||
                         (dir = compareComparables(kc, k, pk)) == 0) {
                     if (!searched) {
-                        SilverHashMap.TreeNode<K,V> q, ch;
+                        TreeNode<K,V> q, ch;
                         searched = true;
                         if (((ch = p.left) != null &&
                                 (q = ch.find(h, k, kc)) != null) ||
@@ -1897,10 +1897,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                     dir = tieBreakOrder(k, pk);
                 }
 
-                SilverHashMap.TreeNode<K,V> xp = p;
+                TreeNode<K,V> xp = p;
                 if ((p = (dir <= 0) ? p.left : p.right) == null) {
-                    SilverHashMap.Node<K,V> xpn = xp.next;
-                    SilverHashMap.TreeNode<K,V> x = map.newTreeNode(h, k, v, xpn);
+                    Node<K,V> xpn = xp.next;
+                    TreeNode<K,V> x = map.newTreeNode(h, k, v, xpn);
                     if (dir <= 0)
                         xp.left = x;
                     else
@@ -1908,7 +1908,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                     xp.next = x;
                     x.parent = x.prev = xp;
                     if (xpn != null)
-                        ((SilverHashMap.TreeNode<K,V>)xpn).prev = x;
+                        ((TreeNode<K,V>)xpn).prev = x;
                     moveRootToFront(tab, balanceInsertion(root, x));
                     return null;
                 }
@@ -1925,14 +1925,14 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
          * the bin is converted back to a plain bin. (The test triggers
          * somewhere between 2 and 6 nodes, depending on tree structure).
          */
-        final void removeTreeNode(SilverHashMap<K,V> map, SilverHashMap.Node<K,V>[] tab,
+        final void removeTreeNode(SilverHashMap<K,V> map, Node<K,V>[] tab,
                                   boolean movable) {
             int n;
             if (tab == null || (n = tab.length) == 0)
                 return;
             int index = (n - 1) & hash;
-            SilverHashMap.TreeNode<K,V> first = (SilverHashMap.TreeNode<K,V>)tab[index], root = first, rl;
-            SilverHashMap.TreeNode<K,V> succ = (SilverHashMap.TreeNode<K,V>)next, pred = prev;
+            TreeNode<K,V> first = (TreeNode<K,V>)tab[index], root = first, rl;
+            TreeNode<K,V> succ = (TreeNode<K,V>)next, pred = prev;
             if (pred == null)
                 tab[index] = first = succ;
             else
@@ -1951,20 +1951,20 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 tab[index] = first.untreeify(map);  // too small
                 return;
             }
-            SilverHashMap.TreeNode<K,V> p = this, pl = left, pr = right, replacement;
+            TreeNode<K,V> p = this, pl = left, pr = right, replacement;
             if (pl != null && pr != null) {
-                SilverHashMap.TreeNode<K,V> s = pr, sl;
+                TreeNode<K,V> s = pr, sl;
                 while ((sl = s.left) != null) // find successor
                     s = sl;
                 boolean c = s.red; s.red = p.red; p.red = c; // swap colors
-                SilverHashMap.TreeNode<K,V> sr = s.right;
-                SilverHashMap.TreeNode<K,V> pp = p.parent;
+                TreeNode<K,V> sr = s.right;
+                TreeNode<K,V> pp = p.parent;
                 if (s == pr) { // p was s's direct parent
                     p.parent = s;
                     s.right = p;
                 }
                 else {
-                    SilverHashMap.TreeNode<K,V> sp = s.parent;
+                    TreeNode<K,V> sp = s.parent;
                     if ((p.parent = sp) != null) {
                         if (s == sp.left)
                             sp.left = p;
@@ -1997,7 +1997,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             else
                 replacement = p;
             if (replacement != p) {
-                SilverHashMap.TreeNode<K,V> pp = replacement.parent = p.parent;
+                TreeNode<K,V> pp = replacement.parent = p.parent;
                 if (pp == null)
                     (root = replacement).red = false;
                 else if (p == pp.left)
@@ -2007,10 +2007,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                 p.left = p.right = p.parent = null;
             }
 
-            SilverHashMap.TreeNode<K,V> r = p.red ? root : balanceDeletion(root, replacement);
+            TreeNode<K,V> r = p.red ? root : balanceDeletion(root, replacement);
 
             if (replacement == p) {  // detach
-                SilverHashMap.TreeNode<K,V> pp = p.parent;
+                TreeNode<K,V> pp = p.parent;
                 p.parent = null;
                 if (pp != null) {
                     if (p == pp.left)
@@ -2033,14 +2033,14 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
          * @param index the index of the table being split
          * @param bit the bit of hash to split on
          */
-        final void split(SilverHashMap<K,V> map, SilverHashMap.Node<K,V>[] tab, int index, int bit) {
-            SilverHashMap.TreeNode<K,V> b = this;
+        final void split(SilverHashMap<K,V> map, Node<K,V>[] tab, int index, int bit) {
+            TreeNode<K,V> b = this;
             // Relink into lo and hi lists, preserving order
-            SilverHashMap.TreeNode<K,V> loHead = null, loTail = null;
-            SilverHashMap.TreeNode<K,V> hiHead = null, hiTail = null;
+            TreeNode<K,V> loHead = null, loTail = null;
+            TreeNode<K,V> hiHead = null, hiTail = null;
             int lc = 0, hc = 0;
-            for (SilverHashMap.TreeNode<K,V> e = b, next; e != null; e = next) {
-                next = (SilverHashMap.TreeNode<K,V>)e.next;
+            for (TreeNode<K,V> e = b, next; e != null; e = next) {
+                next = (TreeNode<K,V>)e.next;
                 e.next = null;
                 if ((e.hash & bit) == 0) {
                     if ((e.prev = loTail) == null)
@@ -2083,9 +2083,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /* ------------------------------------------------------------ */
         // Red-black tree methods, all adapted from CLR
 
-        static <K,V> SilverHashMap.TreeNode<K,V> rotateLeft(SilverHashMap.TreeNode<K,V> root,
-                                                                SilverHashMap.TreeNode<K,V> p) {
-            SilverHashMap.TreeNode<K,V> r, pp, rl;
+        static <K,V> TreeNode<K,V> rotateLeft(TreeNode<K,V> root,
+                                                                TreeNode<K,V> p) {
+            TreeNode<K,V> r, pp, rl;
             if (p != null && (r = p.right) != null) {
                 if ((rl = p.right = r.left) != null)
                     rl.parent = p;
@@ -2101,9 +2101,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             return root;
         }
 
-        static <K,V> SilverHashMap.TreeNode<K,V> rotateRight(SilverHashMap.TreeNode<K,V> root,
-                                                                 SilverHashMap.TreeNode<K,V> p) {
-            SilverHashMap.TreeNode<K,V> l, pp, lr;
+        static <K,V> TreeNode<K,V> rotateRight(TreeNode<K,V> root,
+                                                                 TreeNode<K,V> p) {
+            TreeNode<K,V> l, pp, lr;
             if (p != null && (l = p.left) != null) {
                 if ((lr = p.left = l.right) != null)
                     lr.parent = p;
@@ -2119,10 +2119,10 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             return root;
         }
 
-        static <K,V> SilverHashMap.TreeNode<K,V> balanceInsertion(SilverHashMap.TreeNode<K,V> root,
-                                                                      SilverHashMap.TreeNode<K,V> x) {
+        static <K,V> TreeNode<K,V> balanceInsertion(TreeNode<K,V> root,
+                                                                      TreeNode<K,V> x) {
             x.red = true;
-            for (SilverHashMap.TreeNode<K,V> xp, xpp, xppl, xppr;;) {
+            for (TreeNode<K,V> xp, xpp, xppl, xppr;;) {
                 if ((xp = x.parent) == null) {
                     x.red = false;
                     return x;
@@ -2174,9 +2174,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
             }
         }
 
-        static <K,V> SilverHashMap.TreeNode<K,V> balanceDeletion(SilverHashMap.TreeNode<K,V> root,
-                                                                     SilverHashMap.TreeNode<K,V> x) {
-            for (SilverHashMap.TreeNode<K,V> xp, xpl, xpr;;) {
+        static <K,V> TreeNode<K,V> balanceDeletion(TreeNode<K,V> root,
+                                                                     TreeNode<K,V> x) {
+            for (TreeNode<K,V> xp, xpl, xpr;;) {
                 if (x == null || x == root)
                     return root;
                 else if ((xp = x.parent) == null) {
@@ -2197,7 +2197,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                     if (xpr == null)
                         x = xp;
                     else {
-                        SilverHashMap.TreeNode<K,V> sl = xpr.left, sr = xpr.right;
+                        TreeNode<K,V> sl = xpr.left, sr = xpr.right;
                         if ((sr == null || !sr.red) &&
                                 (sl == null || !sl.red)) {
                             xpr.red = true;
@@ -2235,7 +2235,7 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
                     if (xpl == null)
                         x = xp;
                     else {
-                        SilverHashMap.TreeNode<K,V> sl = xpl.left, sr = xpl.right;
+                        TreeNode<K,V> sl = xpl.left, sr = xpl.right;
                         if ((sl == null || !sl.red) &&
                                 (sr == null || !sr.red)) {
                             xpl.red = true;
@@ -2269,9 +2269,9 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         /**
          * Recursive invariant check
          */
-        static <K,V> boolean checkInvariants(SilverHashMap.TreeNode<K,V> t) {
-            SilverHashMap.TreeNode<K,V> tp = t.parent, tl = t.left, tr = t.right,
-                    tb = t.prev, tn = (SilverHashMap.TreeNode<K,V>)t.next;
+        static <K,V> boolean checkInvariants(TreeNode<K,V> t) {
+            TreeNode<K,V> tp = t.parent, tl = t.left, tr = t.right,
+                    tb = t.prev, tn = (TreeNode<K,V>)t.next;
             if (tb != null && tb.next != t)
                 return false;
             if (tn != null && tn.prev != t)
@@ -2292,20 +2292,5 @@ public class SilverHashMap<K,V> extends AbstractMap<K,V>
         }
     }
 
-    public static void main(String[] args) {
-        SilverHashMap<String,String> map = new SilverHashMap<String,String>();
-        map.put("1","1");
-        for (int i = 0; i < 100000; i++) {
-            map.put(i + "k","@"+i);
-        }
-        System.out.println(map);
-        System.out.println(map.get("1"));
-
-
-        for (int i = 0; i < 100000; i++) {
-            map.remove(1 + "k");
-        }
-        System.out.println(map.get("1"));
-    }
 
 }
