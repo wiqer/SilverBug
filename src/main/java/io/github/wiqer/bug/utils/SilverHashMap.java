@@ -397,15 +397,6 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         return null;
     }
 
-    /**
-     * Initializes or doubles table size.  If null, allocates in
-     * accord with initial capacity target held in field threshold.
-     * Otherwise, because we are using power-of-two expansion, the
-     * elements from each bin must either stay at same index, or move
-     * with a power of two offset in the new table.
-     *
-     * @return the table
-     */
     final Node<K, V>[] resize() {
         Node<K, V>[] oldTab = table;
         int oldCap = (oldTab == null) ? 0 : oldTab.length;
@@ -597,28 +588,15 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         return null;
     }
 
-    /**
-     * Removes all of the mappings from this map.
-     * The map will be empty after this call returns.
-     */
     public void clear() {
         Node<K, V>[] tab;
         modCount++;
         if ((tab = table) != null && size > 0) {
             size = 0;
-            for (int i = 0; i < tab.length; ++i)
-                tab[i] = null;
+            Arrays.fill(tab, null);
         }
     }
 
-    /**
-     * Returns <tt>true</tt> if this map maps one or more keys to the
-     * specified value.
-     *
-     * @param value value whose presence in this map is to be tested
-     * @return <tt>true</tt> if this map maps one or more keys to the
-     * specified value
-     */
     public boolean containsValue(Object value) {
         Node<K, V>[] tab;
         V v;
@@ -634,21 +612,6 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         return false;
     }
 
-    /**
-     * Returns a {@link Set} view of the keys contained in this map.
-     * The set is backed by the map, so changes to the map are
-     * reflected in the set, and vice-versa.  If the map is modified
-     * while an iteration over the set is in progress (except through
-     * the iterator's own <tt>remove</tt> operation), the results of
-     * the iteration are undefined.  The set supports element removal,
-     * which removes the corresponding mapping from the map, via the
-     * <tt>Iterator.remove</tt>, <tt>Set.remove</tt>,
-     * <tt>removeAll</tt>, <tt>retainAll</tt>, and <tt>clear</tt>
-     * operations.  It does not support the <tt>add</tt> or <tt>addAll</tt>
-     * operations.
-     *
-     * @return a set view of the keys contained in this map
-     */
     public Set<K> keySet() {
         Set<K> ks = keySet;
         if (ks == null) {
@@ -699,21 +662,6 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         }
     }
 
-    /**
-     * Returns a {@link Collection} view of the values contained in this map.
-     * The collection is backed by the map, so changes to the map are
-     * reflected in the collection, and vice-versa.  If the map is
-     * modified while an iteration over the collection is in progress
-     * (except through the iterator's own <tt>remove</tt> operation),
-     * the results of the iteration are undefined.  The collection
-     * supports element removal, which removes the corresponding
-     * mapping from the map, via the <tt>Iterator.remove</tt>,
-     * <tt>Collection.remove</tt>, <tt>removeAll</tt>,
-     * <tt>retainAll</tt> and <tt>clear</tt> operations.  It does not
-     * support the <tt>add</tt> or <tt>addAll</tt> operations.
-     *
-     * @return a view of the values contained in this map
-     */
     public Collection<V> values() {
         Collection<V> vs = values;
         if (vs == null) {
@@ -760,22 +708,6 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         }
     }
 
-    /**
-     * Returns a {@link Set} view of the mappings contained in this map.
-     * The set is backed by the map, so changes to the map are
-     * reflected in the set, and vice-versa.  If the map is modified
-     * while an iteration over the set is in progress (except through
-     * the iterator's own <tt>remove</tt> operation, or through the
-     * <tt>setValue</tt> operation on a map entry returned by the
-     * iterator) the results of the iteration are undefined.  The set
-     * supports element removal, which removes the corresponding
-     * mapping from the map, via the <tt>Iterator.remove</tt>,
-     * <tt>Set.remove</tt>, <tt>removeAll</tt>, <tt>retainAll</tt> and
-     * <tt>clear</tt> operations.  It does not support the
-     * <tt>add</tt> or <tt>addAll</tt> operations.
-     *
-     * @return a set view of the mappings contained in this map
-     */
     public Set<Map.Entry<K, V>> entrySet() {
         Set<Map.Entry<K, V>> es;
         return (es = entrySet) == null ? (entrySet = new EntrySet()) : es;
@@ -1506,8 +1438,8 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
     void internalWriteEntries(java.io.ObjectOutputStream s) throws IOException {
         Node<K, V>[] tab;
         if (size > 0 && (tab = table) != null) {
-            for (int i = 0; i < tab.length; ++i) {
-                for (Node<K, V> e = tab[i]; e != null; e = e.next) {
+            for (Node<K, V> kvNode : tab) {
+                for (Node<K, V> e = kvNode; e != null; e = e.next) {
                     s.writeObject(e.key);
                     s.writeObject(e.value);
                 }
