@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -42,7 +43,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
      * tree removal about conversion back to plain bins upon
      * shrinkage.
      */
-    static final int TREEIFY_THRESHOLD = 6;
+    static final int TREEIFY_THRESHOLD = 3;
 
     /**
      * The bin count threshold for untreeifying a (split) bin during a
@@ -129,9 +130,13 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
      * to incorporate impact of the highest bits that would otherwise
      * never be used in index calculations because of table bounds.
      */
-    static int hash(Object key) {
-        int h;
-        return (key == null) ? 0 : (h = key.hashCode()) ^ (h >>> 16);
+     int hash(Object key) {
+        if(key == null){
+            return 0;
+        }
+        int h = key.hashCode();
+        h = (h >>> moveHashBits) | (h << (32 - moveHashBits)) ;
+        return (h ) ^ (h >>> 16);
     }
 
     /**
@@ -226,7 +231,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
 
     final float loadFactor;
 
-    public SilverHashMap(int initialCapacity, float loadFactor) {
+    public SilverHashMap(int initialCapacity, float loadFactor,int moveHashBits) {
         if (initialCapacity < 0)
             throw new IllegalArgumentException("Illegal initial capacity: " +
                     initialCapacity);
@@ -237,10 +242,14 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                     loadFactor);
         this.loadFactor = loadFactor;
         this.threshold = tableSizeFor(initialCapacity);
+        this.moveHashBits = moveHashBits;
     }
 
+    public SilverHashMap(int initialCapacity,int moveHashBits) {
+        this(initialCapacity, DEFAULT_LOAD_FACTOR,moveHashBits);
+    }
     public SilverHashMap(int initialCapacity) {
-        this(initialCapacity, DEFAULT_LOAD_FACTOR);
+        this(initialCapacity, DEFAULT_LOAD_FACTOR, 0);
     }
 
     public SilverHashMap() {
@@ -298,6 +307,8 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             if ((e = first.next) != null) {
                 if (first instanceof TreeNode)
                     return ((TreeNode<K, V>) first).getTreeNode(hash, key);
+                if (first instanceof HashNode)
+                    return ((HashNode<K, V>) first).getNode(key);
                 do {
                     if (e.hash == hash &&
                             ((k = e.key) == key || (key != null && key.equals(k))))
@@ -361,10 +372,19 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             if (p.hash == hash &&
                     ((k = p.key) == key || (key != null && key.equals(k))))
                 e = p;
-            else if (p instanceof TreeNode)
-                e = ((TreeNode<K, V>) p).putTreeVal(this, tab, hash, key, value);
+            else if (p instanceof TreeNode){
+                TreeNode<K, V> treeNode = (TreeNode<K, V>) p;
+                e = treeNode.putTreeVal(this, tab, hash, key, value);
+                if (treeNode.high > UNTREEIFY_THRESHOLD){
+                    SilverHashMap<K, V> hashNodeMap = new SilverHashMap<>(16,moveHashBits + useHashBits);
+                    for (Node<K, V> em = tab[i]; e != null; e = e.next){
+                        hashNodeMap.put(em.key, em.value);
+                    }
+                    tab[i] = new HashNode<>(0,null,null,null,hashNodeMap);
+                }
+            }
             else if (p instanceof HashNode) {
-                V v = ((HashNode<K, V>) p).putHashVal(hash >>> useHashBits, key, value);
+                V v = ((HashNode<K, V>) p).put(key, value);
                 if (v != null) {
                     return v;
                 }
@@ -424,6 +444,8 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         @SuppressWarnings({"rawtypes", "unchecked"})
         Node<K, V>[] newTab = (Node<K, V>[]) new Node[newCap];
         table = newTab;
+        int tableSize = table.length;
+        useHashBits = getMaxBit(tableSize);
         if (oldTab != null) {
             for (int j = 0; j < oldCap; ++j) {
                 Node<K, V> e;
@@ -433,6 +455,31 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                         newTab[e.hash & (newCap - 1)] = e;
                     else if (e instanceof TreeNode)
                         ((TreeNode<K, V>) e).split(this, newTab, j, oldCap);
+                    else if (e instanceof HashNode){
+                        HashNode<K, V> hashNode = ((HashNode<K, V>) e);
+                        SilverHashMap<K, V> sourceMap = hashNode.nodeTable;
+                        if(sourceMap.size() > MIN_TREEIFY_CAPACITY){
+                            SilverHashMap<K, V> leftMap = new SilverHashMap<>(MIN_TREEIFY_CAPACITY,moveHashBits + useHashBits);
+                            SilverHashMap<K, V> rightMap = new SilverHashMap<>(MIN_TREEIFY_CAPACITY,moveHashBits + useHashBits);
+                            for (Map.Entry<K, V> entry : sourceMap.entrySet()) {
+                                K key = entry.getKey();
+                                int hash = hash(key);
+                                if ((hash & oldCap) == 0) {
+                                    leftMap.put(entry.getKey(), entry.getValue());
+                                } else {
+                                    rightMap.put(entry.getKey(), entry.getValue());
+                                }
+                                newTab[j] = new HashNode<>(0,null,null,null,leftMap);
+                                newTab[j + oldCap] = new HashNode<>(0,null,null,null,rightMap);
+
+                            }
+                        }else {
+                            newTab[j + oldCap] = hashNode;
+                            newTab[j] = hashNode;
+                        }
+
+
+                    }
                     else { // preserve order
                         Node<K, V> loHead = null, loTail = null;
                         Node<K, V> hiHead = null, hiTail = null;
@@ -465,8 +512,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 }
             }
         }
-        int tableSize = table.length;
-        useHashBits = getMaxBit(tableSize);
+
         return newTab;
     }
 
@@ -479,6 +525,8 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
     }
 
     int useHashBits = 0;
+
+    int moveHashBits = 0;
 
     /**
      * Replaces all linked nodes in bin at index for given hash unless
@@ -1464,21 +1512,23 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
      */
     // 定义 HashNode 类，实现基本的键值对存储和链表结构
     static class HashNode<K, V> extends Entry<K, V> {
-        private final SilverHashMap nodeTable;
+        private final SilverHashMap<K, V> nodeTable;
 
         // 构造函数，初始化节点的各个属性
-        HashNode(int hash, K key, V value, HashNode<K, V> next, int initialCapacity) {
+        HashNode(int hash, K key, V value, HashNode<K, V> next, SilverHashMap<K, V> map) {
             super(hash, key, value, next);
-            nodeTable = new SilverHashMap<>(initialCapacity);
+            nodeTable = map;
         }
 
         /**
          * Tree version of putVal.
          */
-        V putHashVal(int h, K k, V v) {
-            return (V) nodeTable.putVal(h, key, value, false, true);
+        V put(K k, V v) {
+            return (V) nodeTable.put(k, v);
         }
-
+        final Node<K, V> getNode(Object k) {
+            return nodeTable.getNode(nodeTable.hash(k), k);
+        }
 
     }
 
@@ -1487,6 +1537,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         TreeNode<K, V> left;
         TreeNode<K, V> right;
         TreeNode<K, V> prev;    // needed to unlink next upon deletion
+        int high = 0;
         boolean red;
 
         TreeNode(int hash, K key, V val, Node<K, V> next) {
@@ -1653,16 +1704,21 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         TreeNode<K, V> putTreeVal(SilverHashMap<K, V> map, Node<K, V>[] tab, int h, K k, V v) {
             Class<?> kc = null;
             boolean searched = false;
+            int high = 0;
             TreeNode<K, V> root = (parent != null) ? root() : this;
             for (TreeNode<K, V> p = root; ; ) {
+                high ++;
                 int dir, ph;
                 K pk;
                 if ((ph = p.hash) > h)
                     dir = -1;
                 else if (ph < h)
                     dir = 1;
-                else if ((pk = p.key) == k || (k != null && k.equals(pk)))
+                else if ((pk = p.key) == k || (k != null && k.equals(pk))){
+                    root.high = high;
                     return p;
+                }
+
                 else if ((kc == null &&
                         (kc = comparableClassFor(k)) == null) ||
                         (dir = compareComparables(kc, k, pk)) == 0) {
@@ -1672,8 +1728,11 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                         if (((ch = p.left) != null &&
                                 (q = ch.find(h, k, kc)) != null) ||
                                 ((ch = p.right) != null &&
-                                        (q = ch.find(h, k, kc)) != null))
+                                        (q = ch.find(h, k, kc)) != null)){
+                            root.high = high;
                             return q;
+                        }
+
                     }
                     dir = tieBreakOrder(k, pk);
                 }
@@ -1691,6 +1750,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                     if (xpn != null)
                         ((TreeNode<K, V>) xpn).prev = x;
                     moveRootToFront(tab, balanceInsertion(root, x));
+                    root.high = high;
                     return null;
                 }
             }
@@ -2064,20 +2124,75 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
     }
 
     public static void main(String[] args) {
-        SilverHashMap<String, String> map = new SilverHashMap<String, String>();
-        map.put("1", "1");
-        for (int i = 0; i < 10000000; i++) {
-            map.put(i + "k", "@" + i);
-        }
-        System.out.println(map);
-        System.out.println(map.size());
-        System.out.println(map.get("1"));
+        SilverHashMap<CustomKey, String> map = new SilverHashMap<CustomKey, String>();
+        int size = 10000000;
+        String[] keys = new String[size];
 
-
-        for (int i = 0; i < 100000; i++) {
-            map.remove(1 + "k");
+        for (int i = 0; i < size; i++) {
+            keys[i] = (ThreadLocalRandom.current().nextInt()>>>6) + "";
         }
-        System.out.println(map.get("1"));
+        // 测试插入性能
+        long startTime = System.nanoTime();
+
+        for (int i = 0; i < size; i++) {
+            map.put(getKey(keys[i]), "@" + i);
+        }
+
+        long endTime = System.nanoTime();
+        long insertTime = endTime - startTime;
+
+        for (int i = 0; i < size; i++) {
+            map.get( getKey(keys[i]));
+        }
+        long searchTime = System.nanoTime() - endTime;
+
+        System.out.println("SilverHashMap插入 " + size + " 个元素的时间: " + insertTime + " 纳秒");
+        System.out.println("SilverHashMap查找 " + size + " 个元素的时间: " + searchTime + " 纳秒");
+        HashMap<CustomKey, String> hashMap = new HashMap<CustomKey, String>();
+        // 测试插入性能
+        long startTimeHashMap = System.nanoTime();
+
+        for (int i = 0; i < size; i++) {
+            hashMap.put(getKey(keys[i]), "@" + i);
+        }
+
+        long endTimeHashMap = System.nanoTime();
+        long insertTimeHashMap = endTimeHashMap - startTimeHashMap;
+
+        for (int i = 0; i < size; i++) {
+            hashMap.get(getKey(keys[i]));
+        }
+        long searchTimeHashMap = System.nanoTime() - endTimeHashMap;
+
+        System.out.println("HashMap插入 " + size + " 个元素的时间: " + insertTimeHashMap + " 纳秒");
+        System.out.println("HashMap查找 " + size + " 个元素的时间: " + searchTimeHashMap + " 纳秒");
+        System.out.println("HashMap耗时/SilverHashMap耗时 插入 " + size + " 个元素的性能提升: " + (((float)insertTimeHashMap/(float)insertTime) - 1) * 100 +  "%");
+        System.out.println("HashMap耗时/SilverHashMap耗时 查找 " + size + " 个元素的性能提升: " + (((float)searchTimeHashMap/(float)searchTime) - 1)* 100+  "%");
+    }
+
+    static class CustomKey {
+        private final String value;
+
+        public CustomKey(String value) {
+            this.value = value;
+        }
+
+        @Override
+        public int hashCode() {
+            // 制造低位哈希冲突
+            return (value.hashCode()) ;//<< 3;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            CustomKey customKey = (CustomKey) o;
+            return Objects.equals(value, customKey.value);
+        }
+    }
+    private static CustomKey getKey(String keys) {
+        return  new CustomKey("k" + keys + "mmm");
     }
 
 }
