@@ -1275,6 +1275,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 do {
                     if (p == null)
                         p = tab[i++];
+                    else if (p instanceof HashNode){
+                        ((HashNode<K, V>) p).nodeTable.forEach((k, v) -> action.accept(k));
+                        p = tab[i++];
+                    }
                     else {
                         action.accept(p.key);
                         p = p.next;
@@ -1294,6 +1298,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 while (current != null || index < hi) {
                     if (current == null)
                         current = tab[index++];
+                    else if (current instanceof HashNode){
+                        ((HashNode<K, V>) current).nodeTable.forEach((k, v) -> action.accept(k));
+                        current = tab[index++];
+                    }
                     else {
                         K k = current.key;
                         current = current.next;
@@ -1346,6 +1354,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 do {
                     if (p == null)
                         p = tab[i++];
+                    else if (p instanceof HashNode){
+                        ((HashNode<K, V>) p).nodeTable.forEach((k, v) -> action.accept(v));
+                        p = tab[i++];
+                    }
                     else {
                         action.accept(p.value);
                         p = p.next;
@@ -1365,6 +1377,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 while (current != null || index < hi) {
                     if (current == null)
                         current = tab[index++];
+                    else if (current instanceof HashNode){
+                        ((HashNode<K, V>) current).nodeTable.forEach((k, v) -> action.accept(v));
+                        current = tab[index++];
+                    }
                     else {
                         V v = current.value;
                         current = current.next;
@@ -1416,6 +1432,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 do {
                     if (p == null)
                         p = tab[i++];
+                    else if (p instanceof HashNode){
+                        ((HashNode<K, V>) p).nodeTable.entrySet().forEach(action);
+                        p = tab[i++];
+                    }
                     else {
                         action.accept(p);
                         p = p.next;
@@ -1435,6 +1455,10 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 while (current != null || index < hi) {
                     if (current == null)
                         current = tab[index++];
+                    else if (current instanceof HashNode){
+                        ((HashNode<K, V>) current).nodeTable.entrySet().forEach(action);
+                        current = tab[index++];
+                    }
                     else {
                         Node<K, V> e = current;
                         current = current.next;
