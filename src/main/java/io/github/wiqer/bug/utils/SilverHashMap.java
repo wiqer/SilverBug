@@ -1135,32 +1135,45 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         Node<K, V> current;     // current entry
         int expectedModCount;  // for fast-fail
         int index;             // current slot
-
+        Iterator<Map.Entry<K, V>> entryIterator = null;
         HashIterator() {
             expectedModCount = modCount;
             Node<K, V>[] t = table;
             current = next = null;
             index = 0;
-            //todo 加map判断
             if (t != null && size > 0) { // advance to first entry
                 do {
                 } while (index < t.length && (next = t[index++]) == null);
-                //todo 加map判断
+
             }
         }
 
         public final boolean hasNext() {
+            if(entryIterator != null){
+                return entryIterator.hasNext();
+            }
             return next != null;
         }
 
         final Node<K, V> nextNode() {
+            if(current instanceof HashNode){
+                if(entryIterator == null){
+                    entryIterator  = ((HashNode<K, V>) current).nodeTable.entrySet().iterator();
+                }
+                if(entryIterator.hasNext()){
+                    Map.Entry<K, V> entry = entryIterator.next();
+                    return  new Node<K, V>(0, entry.getKey(), entry.getValue(),null);
+                }else {
+                    entryIterator = null;
+                }
+            }
             Node<K, V>[] t;
             Node<K, V> e = next;
-            //todo 加map判断
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             if (e == null)
                 throw new NoSuchElementException();
+
             if ((next = (current = e).next) == null && (t = table) != null) {
                 do {
                 } while (index < t.length && (next = t[index++]) == null);
