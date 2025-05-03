@@ -607,6 +607,8 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             else if ((e = p.next) != null) {
                 if (p instanceof TreeNode)
                     node = ((TreeNode<K, V>) p).getTreeNode(hash, key);
+                else  if (p instanceof HashNode)
+                    node = ((HashNode<K, V>) p).getNode(hash);
                 else {
                     do {
                         if (e.hash == hash &&
@@ -623,6 +625,11 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                     (value != null && value.equals(v)))) {
                 if (node instanceof TreeNode)
                     ((TreeNode<K, V>) node).removeTreeNode(this, tab, movable);
+                else  if (node instanceof HashNode){
+                    HashNode<K, V> cNode = (HashNode<K, V>) node;
+                    cNode.nodeTable.removeNode(cNode.nodeTable.hash(key), key, value,
+                            matchValue,  movable);
+                }
                 else if (node == p)
                     tab[index] = node.next;
                 else
@@ -649,12 +656,16 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         Node<K, V>[] tab;
         V v;
         if ((tab = table) != null && size > 0) {
-            for (int i = 0; i < tab.length; ++i) {
-                for (Node<K, V> e = tab[i]; e != null; e = e.next) {
-                    if ((v = e.value) == value ||
-                            (value != null && value.equals(v)))
-                        return true;
+            for (Node<K, V> kvNode : tab) {
+                if( kvNode instanceof HashNode ){
+                    return  ((HashNode<K, V>) kvNode).nodeTable.containsValue(value);
+                }else {
+                    for (Node<K, V> e = kvNode; e != null; e = e.next) {
+                        if ((v = e.value) == value || (value != null && value.equals(v)))
+                            return true;
+                    }
                 }
+
             }
         }
         return false;
@@ -700,9 +711,14 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
                 throw new NullPointerException();
             if (size > 0 && (tab = table) != null) {
                 int mc = modCount;
-                for (int i = 0; i < tab.length; ++i) {
-                    for (Node<K, V> e = tab[i]; e != null; e = e.next)
-                        action.accept(e.key);
+                for (Node<K, V> kvNode : tab) {
+                    if( kvNode instanceof HashNode ){
+                         ((HashNode<K, V>) kvNode).nodeTable.forEach(((k, v) -> action.accept(k)));
+                    }else {
+                        for (Node<K, V> e = kvNode; e != null; e = e.next)
+                            action.accept(e.key);
+                    }
+
                 }
                 if (modCount != mc)
                     throw new ConcurrentModificationException();
@@ -1055,8 +1071,14 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         if (size > 0 && (tab = table) != null) {
             int mc = modCount;
             for (int i = 0; i < tab.length; ++i) {
-                for (Node<K, V> e = tab[i]; e != null; e = e.next)
-                    action.accept(e.key, e.value);
+                for (Node<K, V> e = tab[i]; e != null; e = e.next){
+                    if(e instanceof HashNode){
+                        ((HashNode<K, V>) e).nodeTable.forEach(action);
+                    }else {
+                        action.accept(e.key, e.value);
+                    }
+                }
+
             }
             if (modCount != mc)
                 throw new ConcurrentModificationException();
@@ -1070,9 +1092,13 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             throw new NullPointerException();
         if (size > 0 && (tab = table) != null) {
             int mc = modCount;
-            for (int i = 0; i < tab.length; ++i) {
-                for (Node<K, V> e = tab[i]; e != null; e = e.next) {
-                    e.value = function.apply(e.key, e.value);
+            for (Node<K, V> kvNode : tab) {
+                for (Node<K, V> e = kvNode; e != null; e = e.next) {
+                    if (e instanceof HashNode) {
+                        ((HashNode<K, V>) e).nodeTable.replaceAll(function);
+                    } else {
+                        e.value = function.apply(e.key, e.value);
+                    }
                 }
             }
             if (modCount != mc)
@@ -1115,9 +1141,11 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             Node<K, V>[] t = table;
             current = next = null;
             index = 0;
+            //todo 加map判断
             if (t != null && size > 0) { // advance to first entry
                 do {
                 } while (index < t.length && (next = t[index++]) == null);
+                //todo 加map判断
             }
         }
 
@@ -1128,6 +1156,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         final Node<K, V> nextNode() {
             Node<K, V>[] t;
             Node<K, V> e = next;
+            //todo 加map判断
             if (modCount != expectedModCount)
                 throw new ConcurrentModificationException();
             if (e == null)
@@ -1135,6 +1164,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
             if ((next = (current = e).next) == null && (t = table) != null) {
                 do {
                 } while (index < t.length && (next = t[index++]) == null);
+                //todo 加map判断
             }
             return e;
         }
@@ -1526,6 +1556,7 @@ public class SilverHashMap<K, V> extends AbstractMap<K, V>
         V put(K k, V v) {
             return (V) nodeTable.put(k, v);
         }
+
         final Node<K, V> getNode(Object k) {
             return nodeTable.getNode(nodeTable.hash(k), k);
         }
