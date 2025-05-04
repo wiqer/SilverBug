@@ -24,16 +24,16 @@ public class ConcurrentServiceTest {
 
     /**
      *
-     *      * +-+
-     *      * |task1|---------------->|
-     *      * +-+                     |
-     *      *                         v
-     *      * +-+                    +-+  +-+   +-+            +-+  +-+
+     *      *
+     *      * |task1|----------->------  -|
+     *      *                             |
+     *      *                             v
+     *      *                             |
      *      * |task2|----------->----|taskTestClass|------>|main task |----------->end
-     *      * +-+                   +-+  +-+   +-+       |     +-+  +-+
-     *      * +-+                         |             |
-     *      * |task3|----------->----|taskNull|----->---
-     *      * +-+                    +-+  +-+
+     *      *                              |                   |
+     *      *                             |                   |
+     *      * |task3|----------->----|taskNull|----->---------
+     *      *                           报错
      */
     @Test
     public void testForConcurrentServiceTest() {
