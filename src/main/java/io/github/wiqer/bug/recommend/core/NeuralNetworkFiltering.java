@@ -13,9 +13,9 @@ import java.util.Random;
  * @modified By：
  */
 public class NeuralNetworkFiltering {
-    private int inputSize;
-    private int hiddenSize;
-    private int outputSize;
+    private final int inputSize;
+    private final int hiddenSize;
+    private final int outputSize;
 
     /**
      * learningRate（学习率）：学习率控制模型在每次迭代中更新参数的步长。
@@ -24,16 +24,16 @@ public class NeuralNetworkFiltering {
      * 较大的学习率可能会导致模型在训练过程中发散或不稳定。
      * 可以通过尝试不同的学习率，并根据模型的收敛情况来选择合适的值。
      */
-    private double learningRate;
-    private double[][] weightsInputHidden;
+    private final double learningRate;
+    private final double[][] weightsInputHidden;
 
     /**
      * weightsHiddenOutput 是指连接隐藏层和输出层之间的权重矩阵。在神经网络中，每个神经元都与前一层的所有神经元有连接，并且每个连接都有一个对应的权重。
-     *
+     * <p>
      * 对于一个具有 m 个隐藏层神经元和 n 个输出层神经元的神经网络，weightsHiddenOutput 是一个 n x m 的矩阵。其中，每一列代表一个隐藏层神经元与输出层神经元之间的权重连接。
-     *
+     * <p>
      * 每个隐藏层神经元与输出层神经元之间的权重连接，决定了隐藏层神经元对输出层神经元的影响程度。权重越大，表示该连接对输出结果的影响越大；权重越小，表示该连接对输出结果的影响越小。
-     *
+     * <p>
      * 在神经网络的训练过程中，权重矩阵 weightsHiddenOutput 会根据训练数据进行调整，以最小化神经网络的误差。这样，在预测阶段，神经网络就可以使用调整后的权重矩阵来进行准确的预测。
      */
     private double[][] weightsHiddenOutput;
@@ -50,7 +50,7 @@ public class NeuralNetworkFiltering {
         this.weightsInputHidden = new double[inputSize][hiddenSize];
         this.weightsHiddenOutput = new double[hiddenSize][outputSize];
         this.random = new Random();
-        if(outputSize > hiddenSize){
+        if (outputSize > hiddenSize) {
             throw new RuntimeException("outputSize > hiddenSize");
         }
         initializeWeights();
@@ -147,8 +147,8 @@ public class NeuralNetworkFiltering {
 
     public double[] getErrorsPro(double[] nextLayerErrors, double[] actual) {
         double[] errors = new double[hiddenSize];
-       int hiddenOutputSize = outputSize;
-        if(nextLayerErrors.length > hiddenOutputSize){
+        int hiddenOutputSize = outputSize;
+        if (nextLayerErrors.length > hiddenOutputSize) {
             double[] nextLayerLastErrors = Arrays.copyOfRange(nextLayerErrors, hiddenOutputSize, nextLayerErrors.length);
             if (nextLayerLastErrors.length > actual.length) {
                 nextLayerLastErrors = Arrays.copyOf(nextLayerLastErrors, actual.length);
@@ -156,7 +156,7 @@ public class NeuralNetworkFiltering {
             if (nextLayerLastErrors.length < actual.length) {
                 actual = Arrays.copyOf(actual, nextLayerLastErrors.length);
             }
-            nextLayerErrors[hiddenOutputSize-1] =  calculateLoss(nextLayerLastErrors, actual);
+            nextLayerErrors[hiddenOutputSize - 1] = calculateLoss(nextLayerLastErrors, actual);
         }
         for (int i = 0; i < hiddenSize; i++) {
             double error = 0;
@@ -188,6 +188,7 @@ public class NeuralNetworkFiltering {
 
     /**
      * Sigmoid激活函数
+     *
      * @param x
      * @return
      */
@@ -203,6 +204,7 @@ public class NeuralNetworkFiltering {
 
     /**
      * 损失函数 交叉熵损失（Cross-Entropy Loss）
+     *
      * @param predicted
      * @param actual
      * @return
@@ -216,6 +218,7 @@ public class NeuralNetworkFiltering {
 
         return -loss;
     }
+
     public static void main(String[] args) {
         // 示例用法
         // 创建一个具有2个输入节点、2个隐藏节点、1个输出节点的神经网络

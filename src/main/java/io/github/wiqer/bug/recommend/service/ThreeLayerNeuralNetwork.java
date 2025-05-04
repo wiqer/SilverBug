@@ -17,8 +17,6 @@ public class ThreeLayerNeuralNetwork {
     private NeuralNetworkFiltering hiddenLayer2;
     private NeuralNetworkFiltering outputLayer;
 
-    private int inputSize,  outputSize,  hiddenSize1, outputSize1,  hiddenSize2, outputSize2;
-
     public ThreeLayerNeuralNetwork(int inputSize,int outputSize1,int outputSize2, int outputSize, int hiddenSize1, int hiddenSize2, int outputHiddenSize, double learningRate) {
         if(outputSize1 > hiddenSize2){
             throw new RuntimeException("outputSize1 > hiddenSize2");
@@ -53,17 +51,18 @@ public class ThreeLayerNeuralNetwork {
     public static void main(String[] args) {
         // 示例用法
         // 创建一个具有2个输入节点、3个隐藏节点1、2个隐藏节点2、1个输出节点的三层神经网络
-        ThreeLayerNeuralNetwork neuralNetwork = new ThreeLayerNeuralNetwork(4, 4,2, 1 ,4,4, 3,0.1);
+        ThreeLayerNeuralNetwork neuralNetwork = new ThreeLayerNeuralNetwork(4, 4,2, 1 ,4,4, 4,0.1);
 
         // 训练数据
         double[][] trainingData = {
-                {0, 6, 6, 0, 0},
-                {0, 6, 6, 1, 1},
-                {0, 6, 6, 1, 1},
-                {0, 6, 6, 1, 1},
-                {0, 6, 6, 1, 1},
-                {1, 6, 6, 0, 1},
-                {1, 6, 6, 1, 0}
+                {0, 6, 6, 0, 0.8},
+                {0, 6, 6, 1, 0.4},
+                {0, 6, 6, 1, 0.4},
+                {5, 6, 6, 1, 0.7},
+                {3, 6, 6, 1, 0.5},
+                {1, 6, 6, 0, 0.1},
+                {0, 6, 6, 1, 0.4},
+                {1, 6, 6, 1, 0.2}
         };
 
         // 进行训练

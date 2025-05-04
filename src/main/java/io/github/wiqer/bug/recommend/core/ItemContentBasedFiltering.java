@@ -57,6 +57,7 @@ public class ItemContentBasedFiltering {
 
         return recommendedItems;
     }
+
     public static Map<Integer, Map<Integer, Double>> calculateItemSimilarities(Map<Integer, Map<Integer, Double>> itemFeatures) {
         Map<Integer, Map<Integer, Double>> itemSimilarities = new HashMap<>();
 
@@ -112,6 +113,7 @@ public class ItemContentBasedFiltering {
 
         return Math.sqrt(norm);
     }
+
     // 构建用户偏好模型的示例实现
     public static Map<Integer, Map<Integer, Double>> buildUserPreferences(
             Map<Integer, Map<Integer, Double>> userRatings,

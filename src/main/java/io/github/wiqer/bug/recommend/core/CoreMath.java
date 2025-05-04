@@ -20,24 +20,24 @@ import java.util.stream.IntStream;
 public class CoreMath {
 
 
-
     /**
      * 计算相关系数并排序
+     *
      * @param key
      * @param map
-     * @return Map<Integer,Double>
+     * @return Map<Integer, Double>
      */
-    public static Map<Integer,Double> computeNeighbor(Integer key, Map<Integer,List<RelateModel>>  map, int type) {
-        Map<Integer,Double> distMap = new TreeMap<>();
-        List<RelateModel> userItems=map.get(key);
-        map.forEach((k,v)->{
+    public static Map<Integer, Double> computeNeighbor(Integer key, Map<Integer, List<RelateModel>> map, int type) {
+        Map<Integer, Double> distMap = new TreeMap<>();
+        List<RelateModel> userItems = map.get(key);
+        map.forEach((k, v) -> {
             //排除此用户
-            if(!k.equals(key)){
+            if (!k.equals(key)) {
                 //关系系数
-                double coefficient = relateDist(v,userItems,type);
+                double coefficient = relateDist(v, userItems, type);
                 //关系距离
-             //   double distance=Math.abs(coefficient);
-                distMap.put(k,coefficient);
+                //   double distance=Math.abs(coefficient);
+                distMap.put(k, coefficient);
             }
         });
         return distMap;
@@ -49,28 +49,28 @@ public class CoreMath {
      *
      * @param xList
      * @param yList
-     * @param type 类型0基于用户推荐 1基于物品推荐
+     * @param type  类型0基于用户推荐 1基于物品推荐
      * @return double
      */
     private static double relateDist(List<RelateModel> xList, List<RelateModel> yList, int type) {
-        List<Double> xs= new ArrayList<>(xList.size());
-        List<Double> ys=  new ArrayList<>(yList.size());
-        xList.forEach(x->{
-            yList.forEach(y->{
-                if(type==0){
-                    if(x.getItemId().equals(y.getItemId())){
+        List<Double> xs = new ArrayList<>(xList.size());
+        List<Double> ys = new ArrayList<>(yList.size());
+        xList.forEach(x -> {
+            yList.forEach(y -> {
+                if (type == 0) {
+                    if (x.getItemId().equals(y.getItemId())) {
                         xs.add(x.getIndex());
                         ys.add(y.getIndex());
                     }
-                }else{
-                    if(x.getUseId().equals(y.getUseId())){
+                } else {
+                    if (x.getUseId().equals(y.getUseId())) {
                         xs.add(x.getIndex());
                         ys.add(y.getIndex());
                     }
                 }
             });
         });
-        return getRelate(xs,ys);
+        return getRelate(xs, ys);
     }
 
     /**
@@ -82,23 +82,23 @@ public class CoreMath {
      * @author tarzan
      * @date 2020年07月31日 17:03:20
      */
-    public static double getRelate(List<Double> xs, List<Double> ys){
-        int n=xs.size();
+    public static double getRelate(List<Double> xs, List<Double> ys) {
+        int n = xs.size();
         //至少有两个元素
-        if (n<2) {
+        if (n < 2) {
             return 0D;
         }
-        double Ex= xs.stream().mapToDouble(x->x).sum();
-        double Ey=ys.stream().mapToDouble(y->y).sum();
-        double Ex2=xs.stream().mapToDouble(x->Math.pow(x,2)).sum();
-        double Ey2=ys.stream().mapToDouble(y->Math.pow(y,2)).sum();
-        double Exy= IntStream.range(0,n).mapToDouble(i->xs.get(i)*ys.get(i)).sum();
-        double numerator=Exy-Ex*Ey/n;
-        double denominator=Math.sqrt((Ex2-Math.pow(Ex,2)/n)*(Ey2-Math.pow(Ey,2)/n));
-        if (denominator==0) {
+        double Ex = xs.stream().mapToDouble(x -> x).sum();
+        double Ey = ys.stream().mapToDouble(y -> y).sum();
+        double Ex2 = xs.stream().mapToDouble(x -> Math.pow(x, 2)).sum();
+        double Ey2 = ys.stream().mapToDouble(y -> Math.pow(y, 2)).sum();
+        double Exy = IntStream.range(0, n).mapToDouble(i -> xs.get(i) * ys.get(i)).sum();
+        double numerator = Exy - Ex * Ey / n;
+        double denominator = Math.sqrt((Ex2 - Math.pow(Ex, 2) / n) * (Ey2 - Math.pow(Ey, 2) / n));
+        if (denominator == 0) {
             return 0D;
         }
-        return numerator/denominator;
+        return numerator / denominator;
     }
 
 }
