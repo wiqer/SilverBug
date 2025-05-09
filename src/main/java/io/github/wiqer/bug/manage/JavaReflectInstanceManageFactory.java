@@ -4,6 +4,7 @@ import io.github.wiqer.bug.level.BugAbility;
 import io.github.wiqer.bug.utils.ClassUtils;
 import org.apache.commons.collections4.CollectionUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.Set;
 
@@ -36,13 +37,15 @@ public class JavaReflectInstanceManageFactory {
                 } catch (NoSuchMethodException e) {
                     throw new RuntimeException(clz.getName()+" cannot be instantiated!", e);
                 }
-                BugAbility per = (BugAbility) clz.newInstance();
-                if(per instanceof BugAbility){
-                    BugInstanceContainer.add(per, InstanceSourceEnum.JAVA);
-                }
+                BugAbility per = (BugAbility) clz.getDeclaredConstructor().newInstance();
+                BugInstanceContainer.add(per, InstanceSourceEnum.JAVA);
             } catch (InstantiationException e) {
                 throw new RuntimeException(e);
             } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            } catch (NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
 

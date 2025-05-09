@@ -1,7 +1,7 @@
 package io.github.wiqer.bug;
 
 import io.github.wiqer.bug.start.BugStarter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 

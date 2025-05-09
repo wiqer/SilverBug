@@ -6,20 +6,27 @@
 
     <groupId>io.github.wiqer</groupId>
     <artifactId>silver-bug</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.17-SNAPSHOT</version>
 
     <properties>
         <commons-lang3.version>3.12.0</commons-lang3.version>
-        <spring.version>5.3.31</spring.version>
-        <spring.boot.version>2.7.18</spring.boot.version>
-        <junit.version>4.12</junit.version>
+        <spring.version>6.2.5</spring.version>
+        <spring.boot.version>3.4.5</spring.boot.version>
+        <junit.version>5.12.2</junit.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>17</java.version>
+        <therapi-javadoc.version>0.15.0</therapi-javadoc.version>
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <maven-war-plugin.version>3.2.2</maven-war-plugin.version>
+        <maven-compiler-plugin.verison>3.0.0</maven-compiler-plugin.verison>
+        <maven-surefire-plugin.version>3.0.0</maven-surefire-plugin.version>
+        <flatten-maven-plugin.version>1.3.0</flatten-maven-plugin.version>
+        <lombok.version>1.18.26</lombok.version>
+        <mapstruct-plus.version>1.4.8</mapstruct-plus.version>
+        <mapstruct-plus.lombok.version>0.2.0</mapstruct-plus.lombok.version>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
@@ -29,9 +36,8 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <scope>compile</scope>
-            <version>1.18.12</version>
+            <version>${lombok.version}</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
@@ -66,6 +72,18 @@
             <artifactId>spring-boot-starter</artifactId>
             <version>${spring.boot.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>annotationProcessor</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <version>${spring.boot.version}</version>
+            <scope>runtime</scope>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -78,11 +96,23 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>5.8.2</version> <!-- 使用兼容的版本 -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.github.linpeilie</groupId>
+            <artifactId>mapstruct-plus-spring-boot-starter</artifactId>
+            <version>${mapstruct-plus.version}</version>
         </dependency>
     </dependencies>
     <build>
@@ -90,7 +120,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
+                <version>${maven-compiler-plugin.verison}</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -118,7 +148,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-gpg-plugin</artifactId>
-                <version>1.6</version>
+                <version>3.1.0</version>
                 <executions>
                     <execution>
                         <id>sign-artifacts</id>

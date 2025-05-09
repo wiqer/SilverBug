@@ -2,10 +2,11 @@ package io.github.wiqer.bug.ability.impl.branch;
 
 import io.github.wiqer.bug.ability.impl.TrunkLevelTestA1Ability;
 import io.github.wiqer.bug.cache.TestCache;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+
 
 /**
  * ：TrunkLevelTestAbility
@@ -18,7 +19,7 @@ import javax.annotation.Resource;
 @Service
 public class TrunkLevelTestA1A1Ability extends TrunkLevelTestA1Ability {
 
-    @Resource
+    @Autowired
     @Qualifier("a1Cache")
     private TestCache a1Cache;
     @Override

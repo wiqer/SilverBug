@@ -1,12 +1,9 @@
 package io.github.wiqer.bug;
 
-import io.github.wiqer.bug.manage.SpringInstanceManageFactory;
 import io.github.wiqer.bug.start.BugStarter;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 /**
  * ：SpringBootStarerTest
@@ -16,7 +13,6 @@ import org.springframework.test.context.junit4.SpringRunner;
  * description：默认
  * modified By：llf.lilanfeng
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootStarerTest.class, StartUpApplication.class})
 public class SpringBootStarerTest {
 

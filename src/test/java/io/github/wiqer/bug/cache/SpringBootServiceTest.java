@@ -3,8 +3,8 @@ package io.github.wiqer.bug.cache;
 import io.github.wiqer.bug.StartUpApplication;
 import io.github.wiqer.bug.ability.impl.TrunkLevelTestA1Ability;
 import io.github.wiqer.bug.manage.BugInstanceContainer;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -18,7 +18,6 @@ import java.util.List;
  * description：默认
  * modified By：llf.lilanfeng
  */
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = {SpringBootServiceTest.class, StartUpApplication.class})
 public class SpringBootServiceTest {
 

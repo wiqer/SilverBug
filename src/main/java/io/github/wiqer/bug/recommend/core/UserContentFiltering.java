@@ -42,7 +42,7 @@ public class UserContentFiltering {
         //最近邻用户看过电影列表
         List<Integer> neighborItems = userMap.get(nearestUserId).stream().map(RelateModel::getItemId).collect(Collectors.toList());
         //指定用户看过电影列表
-        List<Integer> userItems = userMap.get(userId).stream().map(RelateModel::getItemId).collect(Collectors.toList());
+        List<Integer> userItems = userMap.get(userId).stream().map(RelateModel::getItemId).toList();
         //找到最近邻看过，但是该用户没看过的电影
         neighborItems.removeAll(userItems);
         return neighborItems;
