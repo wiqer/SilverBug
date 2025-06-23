@@ -1,0 +1,24 @@
+# 忽略docs目录
+/docs/
+
+# 忽略Maven/Gradle编译输出
+/target/
+/build/
+
+# 忽略IDE配置文件
+.idea/
+*.iml
+
+# 忽略日志文件
+*.log
+
+# 忽略class文件
+*.class
+
+# 忽略macOS系统文件
+.DS_Store
+
+# 忽略临时文件
+*.swp
+*.swo
+~* 

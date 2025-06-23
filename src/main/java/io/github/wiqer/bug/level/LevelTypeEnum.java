@@ -10,10 +10,10 @@ public enum LevelTypeEnum {
     BUG("bug",4,"BUG","小虫"),
     NOTHING("n",0,"NOTHING","无")
     ,;
-    private String typeShortName;
-    private int typeId;
-    private String typeName;
-    private String typeDetails;
+    private final String typeShortName;
+    private final int typeId;
+    private final String typeName;
+    private final String typeDetails;
 
     LevelTypeEnum(String typeShortName, int typeId, String typeName, String typeDetails) {
         this.typeShortName = typeShortName;

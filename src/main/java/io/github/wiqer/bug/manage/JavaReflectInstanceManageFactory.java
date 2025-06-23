@@ -3,8 +3,10 @@ package io.github.wiqer.bug.manage;
 import io.github.wiqer.bug.level.BugAbility;
 import io.github.wiqer.bug.utils.ClassUtils;
 import org.apache.commons.collections4.CollectionUtils;
-
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -17,35 +19,58 @@ import java.util.Set;
  */
 public class JavaReflectInstanceManageFactory {
 
-    public static void scanAllClassesOnPackageNames(String packageName){
-        Set<Class<?>>  classSet = ClassUtils.getClassSet(packageName);
-        if(CollectionUtils.isEmpty(classSet)){
+    public static void scanAllClassesOnPackageNames(String packageName) {
+        if (packageName == null || packageName.trim().isEmpty()) {
             return;
         }
-        classSet = ClassUtils.getClassSetBySuper(BugAbility.class, classSet);
-        if(CollectionUtils.isEmpty(classSet)){
-            return;
-        }
-        for(Class<?> clz : classSet){
-            try {
-                if(clz.isInterface() || Modifier.isAbstract(clz.getModifiers())){
-                    return;
-                }
-                try {
-                    clz.getConstructor();
-                } catch (NoSuchMethodException e) {
-                    throw new RuntimeException(clz.getName()+" cannot be instantiated!", e);
-                }
-                BugAbility per = (BugAbility) clz.newInstance();
-                if(per instanceof BugAbility){
-                    BugInstanceContainer.add(per, InstanceSourceEnum.JAVA);
-                }
-            } catch (InstantiationException e) {
-                throw new RuntimeException(e);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+        try {
+            Set<Class<?>> classSet = ClassUtils.getClassSet(packageName);
+            if (CollectionUtils.isEmpty(classSet)) {
+                return;
             }
+            classSet = ClassUtils.getClassSetBySuper(BugAbility.class, classSet);
+            if (CollectionUtils.isEmpty(classSet)) {
+                return;
+            }
+            List<BugAbility> instances = new ArrayList<>();
+            for (Class<?> clz : classSet) {
+                try {
+                    if (validateClass(clz)) {
+                        BugAbility instance = createInstance(clz);
+                        instances.add(instance);
+                    }
+                } catch (Exception e) {
+                    // ignore single instance error
+                }
+            }
+            if (!instances.isEmpty()) {
+                BugInstanceContainer.addBatch(instances, InstanceSourceEnum.JAVA);
+            }
+        } catch (Exception e) {
+            // ignore scan error
+        }
+    }
 
+    private static boolean validateClass(Class<?> clz) {
+        if (clz.isInterface()) {
+            return false;
+        }
+        if (Modifier.isAbstract(clz.getModifiers())) {
+            return false;
+        }
+        try {
+            clz.getDeclaredConstructor();
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
+    }
+
+    private static BugAbility createInstance(Class<?> clz) throws Exception {
+        try {
+            return (BugAbility) clz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new IllegalStateException("无法创建 " + clz.getName() + " 的实例", e);
         }
     }
 }
